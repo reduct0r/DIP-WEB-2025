@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<header>
+    <h1><a th:href="@{/hello}">Список</a></h1>
+</header>
+<h1>Информация об услуге №<span th:text="${service.id}"></span></h1>
+<h2>Название: <span th:text="${service.title}"></span></h2>
+</body>
+</html>
