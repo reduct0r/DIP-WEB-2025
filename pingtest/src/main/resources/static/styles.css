@@ -1,0 +1,108 @@
+.body, html, #root {
+    background-color: #141424;
+    font-family: 'Roboto Mono', monospace;
+    margin: 0;
+}
+
+.card-container {
+    display: flex;
+    width: 300px;
+    height: 400px;
+    background-color: #1A1B2E;
+    border: 2px solid #1CBFFF;
+    border-radius: 20px;
+    padding: 1px;
+    margin: 0 auto;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.card-container:hover {
+    background-color: #17172e;
+    border: 3px solid #881af0;
+    padding: 0px;
+    cursor: pointer;
+}
+
+.card-content-container {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    align-items: center;
+}
+
+.card-content-container-img {
+    margin: 0;
+    width: 142px;
+    height: 142px;
+}
+
+.card-title {
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 24px;
+    margin: 0;
+    line-height: 1;
+}
+
+.description {
+    margin: 0;
+    padding-left: 5px;
+    width: 275px;
+    height: 72px;
+    background-color: transparent;
+    font-size: 16px;
+    color: #9193A8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+}
+
+.time {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    margin: 0;
+    margin-left: 10px;
+    font-size: 20px;
+    color: #FFF38E;
+    align-self: self-start;
+    align-items: center;
+    flex-wrap: nowrap;
+}
+
+.button-container {
+    width: 141px;
+    height: 43px;
+    border: 2px solid rgb(255, 255, 255);
+    background-color: #1A1B2E;;
+    border-radius: 30px;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 30px;
+}
+
+.button-container:hover {
+    background-color: #101025;
+    border-color: #881af0;
+    cursor: pointer;
+}
+
+.button-content-container{
+    display: flex;
+    flex-direction: row;
+    gap: 7px;
+    margin: 0;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1CBFFF;
+}
