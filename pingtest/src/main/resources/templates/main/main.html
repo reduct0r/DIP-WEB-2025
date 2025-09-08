@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>Шаблон страницы</title>
+</head>
+<body>
+<div class="page-wrapper">
+    <div class="header-main">
+        <p class="logo-group">
+            <img src="images/icon.png" alt="icon">
+            <span class="logo-title">PINGTEST </span>
+        </p>
+    </div>
+
+    <div class="main-plate">
+        <div class="welcome-title">Расчет времени отклика веб-приложения</div>
+        <div class="search-bar">
+            <input type="text" placeholder="Поиск услуг">
+            <div class="search-button">
+                <img src="images/search_icon.svg" alt="icon">
+            </div>
+        </div>
+
+        <div class="container-plate">
+            <div class="main-cards-container">
+                <div th:each="service : ${services}">
+                    <div th:replace="~{main/card :: card(${service})}"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="footer">Reduct0r 2025</div>
+
+<div class="cart-icon">
+    <img src="/images/cart.png" >
+    <span class="cart-badge" th:if="${cartSize > 0}" th:text="${cartSize}"></span>
+</div>
+
+</body>
+</html>

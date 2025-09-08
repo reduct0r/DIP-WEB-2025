@@ -2,16 +2,16 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
     <link rel="stylesheet" href="styles.css">
-    <title></title>
 </head>
 <body>
-    <div class th:fragment="add-button">
-        <div class="button-container">
-            <p class="button-content-container">
-                <img src="images/plus_circle.svg" alt="placeholder">
-                Добавить
-            </p>
-        </div>
-    </div>
+<div th:fragment="add-button(serviceId)" class="button-container">
+    <form th:action="@{/cart/add}" method="post">
+        <input type="hidden" name="serviceId" th:value="${serviceId}" />
+        <button type="submit" class="button-content-container">
+            <img src="images/plus_circle.svg" alt="placeholder">
+            Добавить
+        </button>
+    </form>
+</div>
 </body>
 </html>
