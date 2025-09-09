@@ -1,6 +1,6 @@
 package com.dip.pingtest.domain
 
-data class ServiceEntity(
+data class Component(
     val id: Int,
     val title: String,
     val description: String,

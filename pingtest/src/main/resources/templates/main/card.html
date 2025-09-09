@@ -4,16 +4,16 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<div th:fragment="card(service)" class="card-container">
-    <a th:href="@{/service/{id}(id=${service.id})}" class="card-link">
+<div th:fragment="card(component)" class="card-container">
+    <a th:href="@{/component/{id}(id=${component.id})}" class="card-link">
         <div class="card-content-container">
-            <img src="images/placeholder_142x142.png" alt="placeholder" th:src="@{'images/'+${service.image}}"/>
-            <p class="card-title" th:text="${service.title}">Кэш</p>
-            <p class="description" th:text="${service.description}">Хранение в памяти для быстрого доступа. Альтернатива БД с приоритетом скорости</p>
+            <img src="images/placeholder_142x142.png" alt="placeholder" th:src="@{'images/'+${component.image}}"/>
+            <p class="card-title" th:text="${component.title}">Название компонента</p>
+            <p class="description" th:text="${component.description}">Краткое описание компонента</p>
             <div class="time">
                 <img src="images/ping_icon.svg" alt="ping icon">
-                <span th:text="${service.time} + ' мс'">10 мс</span>
-                <div th:replace="~{main/add-button :: add-button(${service.id})}"></div>
+                <span th:text="${component.time} + ' мс'">10 мс</span>
+                <div th:replace="~{main/add-button :: add-button(${component.id})}"></div>
             </div>
         </div>
     </a>

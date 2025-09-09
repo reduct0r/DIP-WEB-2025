@@ -68,20 +68,17 @@
     font-size: 30px;
     font-weight: 550;
     margin-top: 145px;
-    padding-left: 170px;
 }
 
 .short-description {
     color: #9193A8;
     margin-top: 18px;
-    padding-left: 170px;
     max-width: 1000px;
 }
 
 .description {
     color: #ffffff;
     margin-top: 18px;
-    padding-left: 170px;
     max-width: 1000px;
     min-width: 650px;
 }

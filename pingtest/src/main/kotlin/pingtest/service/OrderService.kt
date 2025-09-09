@@ -1,16 +1,16 @@
 package com.dip.pingtest.service
 
-import com.dip.pingtest.domain.ServiceEntity
-import com.dip.pingtest.repository.ServiceRepository
+import com.dip.pingtest.domain.Component
+import com.dip.pingtest.repository.ComponentRepository
 import org.springframework.stereotype.Service
 import java.time.LocalTime
 
 @Service
-class ServiceService(private val repo: ServiceRepository) {
+class ComponentService(private val repo: ComponentRepository) {
 
-    fun getServices(): List<ServiceEntity> = repo.getServices()
+    fun getServices(): List<Component> = repo.getComponents()
 
-    fun getService(id: Int): ServiceEntity = repo.getService(id) ?: throw RuntimeException("Not found")
+    fun getService(id: Int): Component = repo.getComponent(id) ?: throw RuntimeException("Not found")
 
     // Добавим время как в теме
     fun getWithTime(): Map<String, Any> {

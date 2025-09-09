@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles.css">
-    <title>Шаблон страницы</title>
+    <title>PINGTEST</title>
 </head>
 <body>
 <div class="page-wrapper">
     <div class="header-main">
-        <p class="logo-group" onclick="window.location.href = '/'">
+        <a th:href="@{/}" class="logo-group">
             <img src="images/icon.png" alt="icon">
-            <span class="logo-title">PINGTEST </span>
-        </p>
+            <span class="logo-title">PINGTEST</span>
+        </a>
     </div>
 
     <div class="main-plate">
@@ -26,8 +26,8 @@
 
         <div class="container-plate">
             <div class="main-cards-container">
-                <div th:each="service : ${services}">
-                    <div th:replace="~{main/card :: card(${service})}"></div>
+                <div th:each="component : ${components}">
+                    <div th:replace="~{main/card :: card(${component})}"></div>
                 </div>
             </div>
         </div>
