@@ -2,6 +2,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  text-decoration: none;
 }
 
 .body, html, #root {
@@ -140,6 +141,7 @@
     background-color: transparent;
     cursor: pointer;
     width: fit-content;
+    text-decoration: none;
 }
 
 .logo-title {
