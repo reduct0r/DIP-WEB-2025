@@ -119,6 +119,9 @@
     font-weight: 700;
     color: #1CBFFF;
     background-color: transparent;
+    border: none;
+    outline: none;
+    box-shadow: none;
 }
 
 .header-main {

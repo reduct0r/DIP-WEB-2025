@@ -7,7 +7,7 @@
 <div th:fragment="add-button(serviceId)" class="button-container">
     <form th:action="@{/cart/add}" method="post">
         <input type="hidden" name="serviceId" th:value="${serviceId}" />
-        <button type="submit" class="button-content-container">
+        <button type="submit" class="button-content-container" onclick="event.stopPropagation()">
             <img src="images/plus_circle.svg" alt="placeholder">
             Добавить
         </button>

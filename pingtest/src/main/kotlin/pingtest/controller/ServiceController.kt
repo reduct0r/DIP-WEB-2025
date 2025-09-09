@@ -24,9 +24,9 @@ class ServiceController(private val service: ServiceService, val repository: Ser
     }
 
     @GetMapping("/service/{id}")
-    fun getService(@PathVariable id: Int, model: Model): String {
-        val service = service.getService(id)
-        model.addAttribute("service", service)
-        return "service"
+    fun viewService(@PathVariable id: Int, model: Model): String {
+        val serviceItem = repository.getService(id)
+        model.addAttribute("service", serviceItem)
+        return "service/card-view"
     }
 }

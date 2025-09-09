@@ -5,16 +5,18 @@
 </head>
 <body>
 <div th:fragment="card(service)" class="card-container">
-    <div class="card-content-container">
-        <img src="images/placeholder_142x142.png" alt="placeholder" th:src="@{'images/'+${service.image}}"/>
-        <p class="card-title" th:text="${service.title}">Кэш</p>
-        <p class="description" th:text="${service.description}">Хранение в памяти для быстрого доступа. Альтернатива БД с приоритетом скорости</p>
-        <div class="time">
-            <img src="images/ping_icon.svg" alt="ping icon">
-            <span th:text="${service.time} + ' мс'">10 мс</span>
-            <div th:insert="~{main/add-button :: add-button(${service.id})}"></div>
+    <a th:href="@{/service/{id}(id=${service.id})}" class="card-link">
+        <div class="card-content-container">
+            <img src="images/placeholder_142x142.png" alt="placeholder" th:src="@{'images/'+${service.image}}"/>
+            <p class="card-title" th:text="${service.title}">Кэш</p>
+            <p class="description" th:text="${service.description}">Хранение в памяти для быстрого доступа. Альтернатива БД с приоритетом скорости</p>
+            <div class="time">
+                <img src="images/ping_icon.svg" alt="ping icon">
+                <span th:text="${service.time} + ' мс'">10 мс</span>
+                <div th:replace="~{main/add-button :: add-button(${service.id})}"></div>
+            </div>
         </div>
-    </div>
+    </a>
 </div>
 </body>
 </html>
