@@ -5,11 +5,11 @@
 </head>
 <body>
 <div th:fragment="cart-item(component)" class="tile-container">
-    <img th:src="@{'/images/'+${component.image}}" alt="component icon" class="icon">
+    <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + ${component.image}" alt="component icon" class="icon" onerror="this.src='/images/placeholder_111x111.png'">
     <p class="title" th:text="${component.title}">База данных</p>
     <p class="description" th:text="${component.description}">Хранение данных: SQL-запросы, чтение/запись в диск. Время доступа обусловливает при больших объемах.</p>
     <div class="time">
-        <img src="/images/ping_icon.svg" alt="icon">
+        <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'ping_icon.svg'" alt="icon" onerror="this.src='/images/placeholder_23x23.png'">
         <span th:text="${component.time} + ' мс'">100 мс</span>
     </div>
     <div class="priority">

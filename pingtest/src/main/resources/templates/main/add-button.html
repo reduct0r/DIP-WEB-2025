@@ -8,7 +8,7 @@
     <form th:action="@{/cart/add}" method="post">
         <input type="hidden" name="componentId" th:value="${componentId}" />
         <button type="submit" class="button-content-container" onclick="event.stopPropagation()">
-            <img src="images/plus_circle.svg" alt="placeholder">
+            <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'plus_circle.svg'" alt="placeholder" onerror="this.src='/images/placeholder_25x25.png'">
             Добавить
         </button>
     </form>

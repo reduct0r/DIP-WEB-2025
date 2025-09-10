@@ -10,7 +10,7 @@
 <div class="page-wrapper">
     <div class="header-main">
         <a th:href="@{/}" class="logo-group">
-            <img src="/images/icon.png" alt="icon">
+            <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'icon.png'" alt="icon" onerror="this.src='/images/icon.png'">
             <span class="logo-title">PINGTEST</span>
         </a>
     </div>
@@ -21,10 +21,10 @@
             <p class="description" th:text="${component.longDescription}">Описание</p>
         </div>
         <div class="image-holder">
-            <img th:src="@{'/images/'+${component.image}}" alt="icon" src="">
+            <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + ${component.image}" alt="icon" onerror="this.src='/images/placeholder_142x142.png'">
             <div class="time-holder">
                 <div class="time-component">
-                    <img src="/images/ping_icon.svg" alt="ping icon">
+                    <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'ping_icon.svg'" alt="ping icon" onerror="this.src='/images/placeholder_55x55'">
                     <span th:text="${component.time} + ' мс'">10 мс</span>
                 </div>
             </div>

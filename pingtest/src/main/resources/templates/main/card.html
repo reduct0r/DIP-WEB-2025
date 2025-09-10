@@ -7,11 +7,11 @@
 <div th:fragment="card(component)" class="card-container">
     <a th:href="@{/component/{id}(id=${component.id})}" class="card-link">
         <div class="card-content-container">
-            <img src="images/placeholder_142x142.png" alt="placeholder" th:src="@{'images/'+${component.image}}"/>
+            <img src="images/placeholder_142x142.png" alt="placeholder" th:src="${minioBaseUrl} + ${component.image}" onerror="this.src='/images/placeholder_142x142.png'"/>
             <p class="card-title" th:text="${component.title}">Название компонента</p>
             <p class="description" th:text="${component.description}">Краткое описание компонента</p>
             <div class="time">
-                <img src="images/ping_icon.svg" alt="ping icon">
+                <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'ping_icon.svg'" alt="ping icon" onerror="this.src='/images/placeholder_23x23.png'">
                 <span th:text="${component.time} + ' мс'">10 мс</span>
                 <div th:replace="~{main/add-button :: add-button(${component.id})}"></div>
             </div>

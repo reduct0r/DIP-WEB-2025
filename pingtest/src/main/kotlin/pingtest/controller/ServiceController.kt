@@ -17,6 +17,7 @@ class ServiceController(val repository: ComponentRepository) {
         model.addAttribute("components", components)
         model.addAttribute("filter", filter ?: "")
         model.addAttribute("cartSize", repository.getRequestItems().size)
+        model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
         return "main/main"
     }
 
@@ -24,6 +25,7 @@ class ServiceController(val repository: ComponentRepository) {
     fun viewService(@PathVariable id: Int, model: Model): String {
         val componentItem = repository.getComponent(id)
         model.addAttribute("component",  componentItem)
+        model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
         return "component/card-view"
     }
 
@@ -32,6 +34,7 @@ class ServiceController(val repository: ComponentRepository) {
         val componentItems = repository.getRequestItems().values.toList()
         model.addAttribute("components", componentItems)
         model.addAttribute("cartSize", repository.getRequestItems().size)
+        model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
         return "cart/request"
     }
 }
