@@ -1,4 +1,4 @@
-package com.dip.pingtest.domain
+package com.dip.pingtest.domain.model
 
 data class Component(
     val id: Int,

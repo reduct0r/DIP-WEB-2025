@@ -1,9 +1,6 @@
 package com.dip.pingtest.controller
 
-import com.dip.pingtest.domain.Component
 import com.dip.pingtest.repository.ComponentRepository
-import com.dip.pingtest.service.ComponentService
-import jakarta.servlet.http.HttpSession
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -12,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam
 
 
 @Controller
-class ServiceController(private val component: ComponentService, val repository: ComponentRepository) {
+class ServiceController(val repository: ComponentRepository) {
 
     @GetMapping("/")
     fun mainPage(@RequestParam(required = false) filter: String?, model: Model): String {

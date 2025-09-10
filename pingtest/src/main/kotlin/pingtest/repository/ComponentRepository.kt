@@ -1,6 +1,6 @@
 package com.dip.pingtest.repository
 
-import com.dip.pingtest.domain.Component
+import com.dip.pingtest.domain.model.Component
 import org.springframework.stereotype.Repository
 
 @Repository
