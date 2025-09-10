@@ -17,12 +17,12 @@
 
     <div class="main-plate">
         <div class="welcome-title">Расчет времени отклика веб-приложения</div>
-        <div class="search-bar">
-            <input type="text" placeholder="Поиск услуг">
-            <div class="search-button">
+        <form th:action="@{/}" method="get" class="search-bar">
+            <input type="text" name="filter" th:value="${filter}" placeholder="Поиск услуг">
+            <button type="submit" class="search-button">
                 <img src="images/search_icon.svg" alt="icon">
-            </div>
-        </div>
+            </button>
+        </form>
 
         <div class="container-plate">
             <div class="main-cards-container">
@@ -37,10 +37,10 @@
 
 <div class="footer">Reduct0r 2025</div>
 
-<div class="cart-icon">
+<a th:href="@{/cart/1}" class="cart-icon">
     <img src="/images/cart.png" >
     <span class="cart-badge" th:if="${cartSize > 0}" th:text="${cartSize}"></span>
-</div>
+</a>
 
 </body>
 </html>

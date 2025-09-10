@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <link rel="stylesheet" href="request-styles.css">
+</head>
+<body>
+<div th:fragment="cart-item(component)" class="tile-container">
+    <img th:src="@{'/images/'+${component.image}}" alt="component icon" class="icon">
+    <p class="title" th:text="${component.title}">База данных</p>
+    <p class="description" th:text="${component.description}">Хранение данных: SQL-запросы, чтение/запись в диск. Время доступа обусловливает при больших объемах.</p>
+    <div class="time">
+        <img src="/images/ping_icon.svg" alt="icon">
+        <span th:text="${component.time} + ' мс'">100 мс</span>
+    </div>
+    <div class="priority">
+        Уровень приоритета
+        <input type="number" value="1" class="mini-input">
+    </div>
+    <label class="checkbox-label">
+        <input type="checkbox" checked>
+        Альтернатива
+    </label>
+</div>
+</body>
+</html>

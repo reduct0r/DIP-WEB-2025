@@ -235,6 +235,7 @@
 }
 
 .cart-icon {
+    position: relative;
     position: fixed;
     bottom: 50px;
     left: 40px;

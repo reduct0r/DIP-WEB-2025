@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/request-styles.css">
+    <html xmlns:th="http://www.thymeleaf.org" lang="ru"></html>
+    <title>Request page</title>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="header-main">
+            <a th:href="@{/}" class="logo-group">
+                <img src="/images/icon.png" alt="icon">
+                <span class="logo-title">PINGTEST</span>
+            </a>
+        </div>
+
+        <div class="main-plate">
+            <div class="welcome-title">Заявка</div>
+            <div class="container-plate">
+                <div class="components-stack">
+                    <div th:each="component : ${components}">
+                        <div th:replace="~{cart/component-el :: cart-item(${component})}"></div>
+                    </div>
+                    <div class="resuilt-holder">
+                        <div class="calculations-container"> 
+                            <p class="resuilt-title">Итоговое время: 250 мс</p>
+                        </div>
+
+                        <div class="calculate-button">GO</div>
+                    </div>
+                </div>
+
+            </div>
+        
+        </div>
+    </div>
+
+    <div class="footer">Reduct0r 2025</div>
+
+</body>
+</html>
