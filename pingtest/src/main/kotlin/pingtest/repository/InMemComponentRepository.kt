@@ -2,9 +2,10 @@ package com.dip.pingtest.repository
 
 import com.dip.pingtest.domain.model.Component
 import org.springframework.stereotype.Repository
+import pingtest.domain.repository.ComponentRepository
 
 @Repository
-class ComponentRepository {
+class InMemComponentRepository: ComponentRepository {
     val dbList = listOf(
         Component(1, "Кэш", "Хранение часто используемых данных в памяти для ускорения доступа.", "Кэширование играет ключевую роль в повышении производительности веб-приложений, уменьшая нагрузку на сервер и время отклика. Оно позволяет избежать повторных обращений к медленным источникам данных, таким как база данных или внешние API, храня копии результатов в быстром хранилище, например, в RAM. Типичное время отклика для кэша составляет около 10 мс, что делает его идеальным для оптимизации часто запрашиваемых ресурсов.", 10, "cache.png"),
         Component(2, "Бэкенд", "Серверная логика и обработка запросов от клиентов.", "Бэкенд отвечает за основную логику приложения, включая обработку запросов, бизнес-логику, аутентификацию, интеграцию с базами данных и внешними сервисами. Он генерирует динамический контент и отправляет ответы фронтенду. Время обработки на бэкенде зависит от сложности операций и может варьироваться от 20 до 150 мс для типичных запросов, влияя на общую скорость приложения.", 150, "backend.png"),
@@ -17,7 +18,11 @@ class ComponentRepository {
         2 to dbList[2]
     )
 
-    fun getComponents(filter: String? = null): List<Component> {
+    val orderStorage: Map<Int, List<Component>> = mapOf(
+        1 to listOf(dbList[0], dbList[2])
+    )
+
+    override fun getComponents(filter: String?): List<Component> {
         if (filter.isNullOrBlank()) return dbList
         return dbList.filter {
             it.title.contains(filter, ignoreCase = true) ||
@@ -26,11 +31,10 @@ class ComponentRepository {
         }
     }
 
-    fun getComponent(id: Int): Component? {
+    override fun getComponent(id: Int): Component? {
         return dbList.find { it.id == id } ?: throw RuntimeException("Service not found")
     }
 
-    fun getRequestItems(): Map<Int, Component> {
-        return requestMap
-    }
+    override fun getRequestItems(key: Int): List<Component> =
+        orderStorage[key] ?: emptyList()
 }
