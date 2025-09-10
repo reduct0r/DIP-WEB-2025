@@ -14,7 +14,7 @@ class ComponentRepository {
 
     private val requestMap = mapOf(
         1 to dbList[0],
-        3 to dbList[2]
+        2 to dbList[2]
     )
 
     fun getComponents(filter: String? = null): List<Component> {

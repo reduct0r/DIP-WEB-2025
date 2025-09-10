@@ -33,7 +33,6 @@ class ServiceController(val repository: ComponentRepository) {
     fun viewCart(@PathVariable id: Int, model: Model): String {
         val componentItems = repository.getRequestItems().values.toList()
         model.addAttribute("components", componentItems)
-        model.addAttribute("cartSize", repository.getRequestItems().size)
         model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
         return "cart/request"
     }
