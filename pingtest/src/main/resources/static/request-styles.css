@@ -23,9 +23,9 @@ body, html {
     padding: 10px;
     margin: 0;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    gap: 15px; /* Уменьшили gap для места */
+    gap: 15px;
     transition: background-color 0.3s ease, border-color 0.3s ease;
-    overflow: hidden; /* Скрываем переполнение, если нужно */
+    overflow: hidden;
 }
 
 .tile-container:hover {
@@ -51,7 +51,7 @@ body, html {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-    flex: 0 0 120px; /* Уменьшили для места */
+    flex: 0 0 120px;
 }
 
 .description {
@@ -61,8 +61,8 @@ body, html {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 4;
-    flex: 1; /* Flex-grow для адаптации */
-    min-width: 200px; /* Мин ширина */
+    flex: 1;
+    min-width: 200px;
 }
 
 .time {
@@ -71,7 +71,7 @@ body, html {
     gap: 5px;
     font-size: 20px;
     color: #FFF38E;
-    flex: 0 0 100px; /* Уменьшили */
+    flex: 0 0 100px;
     overflow: hidden;
 }
 
@@ -90,7 +90,7 @@ body, html {
     font-size: 16px;
     color: #ffffff;
     white-space: nowrap;
-    flex: 0 0 150px; /* Уменьшили */
+    flex: 0 0 150px;
 }
 
 .checkbox-label {
@@ -98,15 +98,15 @@ body, html {
     align-items: center;
     gap: 5px;
     font-size: 16px;
-    color: #ffffff; /* Изменили на белый для видимости */
+    color: #ffffff;
     white-space: nowrap;
-    flex: 0 0 100px; /* Уменьшили */
+    flex: 0 0 100px;
 }
 
 .mini-input {
     width: 40px;
     height: 30px;
-    background-color: #05061F; /* Тёмно-синий, как фон request */
+    background-color: #05061F;
     color: #ffffff;
     border: none;
     border-radius: 5px;
@@ -119,26 +119,25 @@ body, html {
     height: 20px;
 }
 
-/* Новая группа для m-m полей */
 .mm-fields {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 10px;
-    flex: 0 0 300px; /* Фиксированная ширина для всей группы справа */
-    justify-content: flex-end; /* Прижать к правому краю */
+    flex: 0 0 300px;
+    justify-content: flex-end;
 }
 
 .mm-param {
     font-size: 14px;
     color: #ffffff;
     white-space: nowrap;
-    flex: 0 0 80px; /* Компактно для p */
+    flex: 0 0 80px;
     margin: 0;
 }
 
 .dark-select {
-    background-color: #05061F; /* Тёмно-синий, как фон request */
+    background-color: #05061F;
     color: #ffffff;
     border: 1px solid #1CBFFF;
     border-radius: 5px;
@@ -199,7 +198,34 @@ body, html {
     padding-bottom: 23px;
 }
 
-.result-holder { /* Исправили опечатку resuilt → result */
+.request-info {
+    background-color: #1A1B2E;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    margin-left: 20px;
+    margin-bottom: 10px;
+    width: max-content;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    font-size: 18px;
+    border: 1px solid #121324;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.request-info p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.request-info span {
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.result-holder {
     display: flex;
     flex-direction: row;
     background-color: #05061F;
@@ -238,11 +264,11 @@ body, html {
     flex-shrink: 0;
 }
 
-.result-title { /* Исправили op */
+.result-title {
     color: #ffffff;
-    font-family: 'Roboto', monospace; /* Поправили 'Roboto' 'monospace' → с запятой */
+    font-family: 'Roboto', monospace;
     font-size: 30px;
-    margin-top: 138px;
+    margin: 20px;
     line-height: 1;
 }
 

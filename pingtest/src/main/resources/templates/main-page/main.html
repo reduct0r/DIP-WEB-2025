@@ -17,12 +17,14 @@
 
     <div class="main-plate">
         <div class="welcome-title">Расчет времени отклика веб-приложения</div>
-        <form th:action="@{/}" method="get" class="search-bar">
-            <input type="text" name="filter" th:value="${filter}" placeholder="Поиск услуг">
-            <button type="submit" class="search-button">
-                <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'search_icon.svg'" alt="icon" onerror="this.src='images/placeholder_29x29.png'">
-            </button>
-        </form>
+        <div class="search-holder">
+            <form th:action="@{/}" method="get" class="search-bar">
+                <input type="text" name="filter" th:value="${filter}" placeholder="Поиск услуг">
+                <button type="submit" class="search-button">
+                    <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'search_icon.svg'" alt="icon" onerror="this.src='images/placeholder_29x29.png'">
+                </button>
+            </form>
+        </div>
 
         <div class="container-plate">
             <div class="main-cards-container">

@@ -128,8 +128,7 @@
 .header-main {
     height: 80px;
     background-color: #1A1B2E;
-    border: 1px solid #141424;
-
+    border-bottom: 3px solid #141424;
 }
 
 .logo-group {
@@ -165,10 +164,14 @@
     padding-left: 45px;
 }
 
+.search-holder {
+     background-color: #161729;
+}
+
 .search-bar {
   position: relative;
   width: 480px;
-  margin: 60px auto 0;
+  margin: 30px auto 0;
 }
 
 .search-bar input {
@@ -235,10 +238,9 @@
 }
 
 .cart-icon {
-    position: relative;
     position: fixed;
     bottom: 50px;
-    left: 40px;
+    right: 40px;
     padding: 20px;
     cursor: pointer;
     z-index: 1000;
