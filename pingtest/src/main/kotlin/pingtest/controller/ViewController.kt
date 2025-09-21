@@ -1,6 +1,6 @@
 package com.dip.pingtest.controller
 
-import com.dip.pingtest.repository.InMemComponentRepository
+import com.dip.pingtest.repository.ComponentRepository
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -9,14 +9,14 @@ import org.springframework.web.bind.annotation.RequestParam
 
 
 @Controller
-class ViewController(val repository: InMemComponentRepository) {
+class ServiceController(val repository: ComponentRepository) {
 
     @GetMapping("/")
     fun mainPage(@RequestParam(required = false) filter: String?, model: Model): String {
         val components = repository.getComponents(filter)
         model.addAttribute("components", components)
         model.addAttribute("filter", filter ?: "")
-        model.addAttribute("cartSize", repository.getRequestItems(1).size)
+        model.addAttribute("cartSize", repository.getRequestItemCount(id = 1))
         model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
         return "main/main"
     }
@@ -29,10 +29,10 @@ class ViewController(val repository: InMemComponentRepository) {
         return "component/card-view"
     }
 
-    @GetMapping("/cart/{id}")
+    @GetMapping("/request/{id}")
     fun viewCart(@PathVariable id: Int, model: Model): String {
-        val componentItems = repository.getRequestItems(id)
-        model.addAttribute("components", componentItems)
+        val request = repository.getRequest(id) ?: throw RuntimeException("Request not found")
+        model.addAttribute("request", request)
         model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
         return "cart/request"
     }

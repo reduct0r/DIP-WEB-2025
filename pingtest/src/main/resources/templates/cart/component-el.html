@@ -1,25 +1,40 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
-    <link rel="stylesheet" href="request-styles.css">
+    <link rel="stylesheet" href="/request-styles.css">
 </head>
 <body>
-<div th:fragment="cart-item(component)" class="tile-container">
-    <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + ${component.image}" alt="component icon" class="icon" onerror="this.src='/images/placeholder_111x111.png'">
-    <p class="title" th:text="${component.title}">База данных</p>
-    <p class="description" th:text="${component.description}">Хранение данных: SQL-запросы, чтение/запись в диск. Время доступа обусловливает при больших объемах.</p>
+<div th:fragment="cart-item(item)" class="tile-container" th:if="${item != null and item.component != null}"> <!-- Проверка на null для item и component -->
+    <!-- Поля услуги слева-направо (image, title, description, time) -->
+    <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + ${item.component.image}" alt="component icon" class="icon" onerror="this.src='/images/placeholder_111x111.png'">
+    <p class="title" th:text="${item.component.title ?: 'Неизвестно'}">База данных</p>
+    <p class="description" th:text="${item.component.description ?: 'Нет описания'}">Хранение данных: SQL-запросы, чтение/запись в диск. Время доступа обусловливает при больших объемах.</p> <!-- Короткое description -->
+
+    <!-- Ввод времени -->
     <div class="time">
         <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'ping_icon.svg'" alt="icon" onerror="this.src='/images/placeholder_23x23.png'">
-        <span th:text="${component.time} + ' мс'">100 мс</span>
+        <input type="number" th:value="${item.component.time}" class="mini-input" placeholder="мс">
+        мс
     </div>
-    <div class="priority">
-        Уровень приоритета
-        <input type="number" value="1" class="mini-input">
+
+    <!-- m-m поля справа -->
+    <div class="mm-fields">
+        <div class="priority">
+            Приоритет
+            <input type="number" th:value="${item.order}" class="mini-input"> <!-- order как priority -->
+        </div>
+        <!-- Выпадающий список -->
+        <select class="dark-select" th:value="${item.group ?: 'Нет'}">
+            <option value="БД">БД</option>
+            <option value="Кэш">Кэш</option>
+            <option value="Нет">Нет</option>
+        </select>
+        <!-- Количество -->
+        <div class="quantity">
+            Кол-во
+            <input type="number" th:value="${item.quantity}" class="mini-input">
+        </div>
     </div>
-    <label class="checkbox-label">
-        <input type="checkbox" checked>
-        Альтернатива
-    </label>
 </div>
 </body>
 </html>

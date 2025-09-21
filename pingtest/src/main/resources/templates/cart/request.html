@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
-<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/request-styles.css">
-    <html xmlns:th="http://www.thymeleaf.org" lang="ru"></html>
     <title>Request page</title>
 </head>
 <body>
@@ -19,22 +17,27 @@
 
     <div class="main-plate">
         <div class="welcome-title">Заявка</div>
+
+        <div class="request-info">
+            <p>Номер заявки: <span th:text="${request.id}"></span></p>
+            <p>Дата создания: <span th:text="${request.createdAt}"></span></p>
+        </div>
+
         <div class="container-plate">
             <div class="components-stack">
-                <div th:each="component : ${components}">
-                    <div th:replace="~{cart/component-el :: cart-item(${component})}"></div>
+                <div th:each="item : ${request.items}">
+                    <div th:replace="~{cart/component-el :: cart-item(${item})}"></div>
                 </div>
-                <div class="resuilt-holder">
-                    <div class="calculations-container">
-                        <p class="resuilt-title">Итоговое время: 250 мс</p>
-                    </div>
 
+                <!-- Результат вычислений -->
+                <div class="result-holder">
+                    <div class="calculations-container">
+                        <p class="result-title">Итоговое время: <span th:text="${request.totalTime} + ' мс'"></span></p>  <!-- Результат вычислений -->
+                    </div>
                     <!--div class="calculate-button">GO</div-->
                 </div>
             </div>
-
         </div>
-
     </div>
 </div>
 
