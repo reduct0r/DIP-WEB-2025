@@ -26,8 +26,8 @@
 
         <div class="container-plate">
             <div class="main-cards-container">
-                <div th:each="component : ${components}">
-                    <div th:replace="~{main/card :: card(${component})}"></div>
+                <div th:each="it : ${components}">
+                    <div th:replace="~{main-page/card-component :: card-component(${it})}"></div>
                 </div>
             </div>
         </div>

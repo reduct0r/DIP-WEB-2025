@@ -18,7 +18,7 @@ class ServiceController(val repository: ComponentRepository) {
         model.addAttribute("filter", filter ?: "")
         model.addAttribute("cartSize", repository.getRequestItemCount(id = 1))
         model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
-        return "main/main"
+        return "main-page/main"
     }
 
     @GetMapping("/component/{id}")
@@ -26,7 +26,7 @@ class ServiceController(val repository: ComponentRepository) {
         val componentItem = repository.getComponent(id)
         model.addAttribute("component",  componentItem)
         model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
-        return "component/card-view"
+        return "details-page/component-detailed"
     }
 
     @GetMapping("/request/{id}")
@@ -34,6 +34,6 @@ class ServiceController(val repository: ComponentRepository) {
         val request = repository.getRequest(id) ?: throw RuntimeException("Request not found")
         model.addAttribute("request", request)
         model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
-        return "cart/request"
+        return "request-page/request"
     }
 }

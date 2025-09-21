@@ -4,7 +4,7 @@
     <link rel="stylesheet" href="/request-styles.css">
 </head>
 <body>
-<div th:fragment="cart-item(item)" class="tile-container" th:if="${item != null and item.component != null}"> <!-- Проверка на null для item и component -->
+<div th:fragment="request-component(item)" class="tile-container" th:if="${item != null and item.component != null}"> <!-- Проверка на null для item и details-page -->
     <!-- Поля услуги слева-направо (image, title, description, time) -->
     <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + ${item.component.image}" alt="component icon" class="icon" onerror="this.src='/images/placeholder_111x111.png'">
     <p class="title" th:text="${item.component.title ?: 'Неизвестно'}">База данных</p>
