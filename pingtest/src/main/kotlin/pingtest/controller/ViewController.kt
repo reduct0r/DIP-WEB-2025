@@ -34,11 +34,8 @@ class ServiceController(val repository: ComponentRepository) {
     @GetMapping("/request/{id}")
     fun viewRequest(@PathVariable id: Int, model: Model): String {
         val request = repository.getRequest(id) ?: throw RuntimeException("Request not found")
-        val itemsWithComponents: List<Pair<RequestComponent, Component?>> = request.items.map { item ->
-            item to repository.getComponent(item.componentId)
-        }
+
         model.addAttribute("request", request)
-        model.addAttribute("itemsWithComponents", itemsWithComponents)
         model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
         return "request-page/request"
     }
