@@ -8,5 +8,5 @@ class PingtestApplication
 
 fun main(args: Array<String>) {
 	runApplication<PingtestApplication>(*args)
-    println("Hello world")
+    println("Application started")
 }

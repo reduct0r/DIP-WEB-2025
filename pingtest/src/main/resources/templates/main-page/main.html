@@ -39,10 +39,12 @@
 
 <div class="footer">Reduct0r 2025</div>
 
-<a th:href="@{/request/1}" class="request-icon">
-    <img th:src="${requestIconUrl}" onerror="this.src='images/placeholder_85x89.png'">
-    <span class="request-badge" th:if="${requestSize > 0}" th:text="${requestSize}"></span>
-</a>
+<div th:if="${draftRequestId != null}">
+    <a th:href="@{/request/{id}(id=${draftRequestId})}" class="request-icon">
+        <img th:src="${requestIconUrl}" onerror="this.src='images/placeholder_85x89.png'">
+        <span class="request-badge" th:if="${requestSize > 0}" th:text="${requestSize}"></span>
+    </a>
+</div>
 
 </body>
 </html>

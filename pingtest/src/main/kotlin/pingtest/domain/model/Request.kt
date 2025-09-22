@@ -14,7 +14,7 @@ import jakarta.persistence.Table
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "requests")  // Requests table
+@Table(name = "requests")
 data class Request(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
@@ -29,11 +29,10 @@ data class Request(
     @ManyToOne
     @JoinColumn(name = "moderator_id")
     val moderator: User? = null,
-    // Additional domain-specific fields
-    val totalTime: Int = 0,  // Calculated field upon completion
+
+    var totalTime: Int = 0,
     val notes: String? = null
 ) {
-    // Ensure no cascade delete as per TZ
     @OneToMany(mappedBy = "request", cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     val items: MutableList<RequestComponent> = mutableListOf()
 }
