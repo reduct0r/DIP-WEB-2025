@@ -11,7 +11,7 @@
             <p class="card-title" th:text="${component.title}">Название компонента</p>
             <p class="description" th:text="${component.description}">Краткое описание компонента</p>
             <div class="time">
-                <img th:src="@{/images/ping_icon.svg}" alt="ping icon" onerror="this.src='/images/placeholder_23x23.png'">
+                <img th:src="${pingIconUrl}" alt="ping icon" onerror="this.src='/images/placeholder_23x23.png'">
                 <span th:text="${component.time} + ' мс'">10 мс</span>
                 <div th:replace="~{main-page/add-button :: add-button(${component.id})}"></div>
             </div>

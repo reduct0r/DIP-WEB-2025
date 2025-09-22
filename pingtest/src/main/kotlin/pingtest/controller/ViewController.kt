@@ -19,8 +19,13 @@ class ServiceController(
         model.addAttribute("components", components)
         model.addAttribute("filter", filter ?: "")
         model.addAttribute("requestSize", requestService.getRequestItemCount(1))
-        model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
+        model.addAttribute("minioBaseUrl", "")
 
+        model.addAttribute("iconUrl", componentService.getStaticImageUrl("icon.png"))
+        model.addAttribute("searchIconUrl", componentService.getStaticImageUrl("search_icon.svg"))
+        model.addAttribute("pingIconUrl", componentService.getStaticImageUrl("ping_icon.svg"))
+        model.addAttribute("plusCircleUrl", componentService.getStaticImageUrl("plus_circle.svg"))
+        model.addAttribute("requestIconUrl", componentService.getStaticImageUrl("cart.png"))
         return "main-page/main"
     }
 
@@ -28,6 +33,7 @@ class ServiceController(
     fun viewService(@PathVariable id: Int, model: Model): String {
         val component = componentService.getComponent(id) ?: throw RuntimeException("Component not found")
         model.addAttribute("component", component)
+        model.addAttribute("pingIconUrl", componentService.getStaticImageUrl("ping_icon.svg"))
         return "details-page/component-detailed"
     }
 

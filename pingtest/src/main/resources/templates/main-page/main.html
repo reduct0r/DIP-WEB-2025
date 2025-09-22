@@ -10,7 +10,7 @@
 <div class="page-wrapper">
     <div class="header-main">
         <a th:href="@{/}" class="logo-group">
-            <img th:src="@{/images/icon.png}" alt="icon" onerror="this.src='images/images/icon.png'">
+            <img th:src="${iconUrl}" alt="icon" onerror="this.src='images/images/icon.png'">
             <span class="logo-title">PINGTEST</span>
         </a>
     </div>
@@ -21,7 +21,7 @@
             <form th:action="@{/}" method="get" class="search-bar">
                 <input type="text" name="filter" th:value="${filter}" placeholder="Поиск услуг">
                 <button type="submit" class="search-button">
-                    <img th:src="@{/images/search_icon.svg}" alt="icon" onerror="this.src='images/placeholder_29x29.png'">
+                    <img th:src="${searchIconUrl}" alt="icon" onerror="this.src='images/placeholder_29x29.png'">
                 </button>
             </form>
         </div>
@@ -40,7 +40,7 @@
 <div class="footer">Reduct0r 2025</div>
 
 <a th:href="@{/request/1}" class="request-icon">
-    <img th:src="@{/images/cart.png}" onerror="this.src='images/placeholder_85x89.png'">
+    <img th:src="${requestIconUrl}" onerror="this.src='images/placeholder_85x89.png'">
     <span class="request-badge" th:if="${requestSize > 0}" th:text="${requestSize}"></span>
 </a>
 

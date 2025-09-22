@@ -35,6 +35,10 @@ class ComponentService(
         return component
     }
 
+    fun getStaticImageUrl(imageName: String): String? {
+        return generatePresignedUrl(imageName)
+    }
+
     fun generatePresignedUrl(imageName: String?): String? {
         if (imageName == null) return null
         val link = minioClient.getPresignedObjectUrl(
