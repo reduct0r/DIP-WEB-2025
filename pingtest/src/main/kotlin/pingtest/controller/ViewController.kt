@@ -1,5 +1,3 @@
-// Updated controller (remove hardcoded minioBaseUrl, use imageUrl from model)
-
 package com.dip.pingtest.controller
 
 import com.dip.pingtest.domain.model.RequestStatus
@@ -20,8 +18,9 @@ class ServiceController(
         val components = componentService.getComponents(filter)
         model.addAttribute("components", components)
         model.addAttribute("filter", filter ?: "")
-        model.addAttribute("requestSize", requestService.getRequestItemCount(1))  // Hardcoded userId=1 for now
-        // No minioBaseUrl needed; use component.imageUrl in templates
+        model.addAttribute("requestSize", requestService.getRequestItemCount(1))
+        model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
+
         return "main-page/main"
     }
 
@@ -29,7 +28,6 @@ class ServiceController(
     fun viewService(@PathVariable id: Int, model: Model): String {
         val component = componentService.getComponent(id) ?: throw RuntimeException("Component not found")
         model.addAttribute("component", component)
-        // No minioBaseUrl; use component.imageUrl
         return "details-page/component-detailed"
     }
 

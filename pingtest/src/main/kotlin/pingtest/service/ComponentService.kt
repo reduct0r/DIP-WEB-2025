@@ -35,15 +35,16 @@ class ComponentService(
         return component
     }
 
-    fun generatePresignedUrl(objectName: String?): String? {
-        if (objectName == null) return null
-        return minioClient.getPresignedObjectUrl(
+    fun generatePresignedUrl(imageName: String?): String? {
+        if (imageName == null) return null
+        val link = minioClient.getPresignedObjectUrl(
             GetPresignedObjectUrlArgs.builder()
                 .method(Method.GET)
                 .bucket(minioProperties.bucket)
-                .`object`(objectName)
-                .expiry(1, TimeUnit.HOURS)  // Short expiry for demo; adjust as needed
+                .`object`(imageName)
                 .build()
         )
-    }
+        println(link)
+        return link
+}
 }

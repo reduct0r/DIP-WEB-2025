@@ -1,5 +1,6 @@
 package com.dip.pingtest.domain.model
 
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -15,14 +16,12 @@ data class Component(
     val id: Int = 0,
     val title: String,
     val description: String,
+    @Column(columnDefinition = "TEXT")
     val longDescription: String,
     val time: Int,
     val image: String? = null,  // Nullable object name in MinIO
     @Enumerated(EnumType.STRING)
     val status: ComponentStatus = ComponentStatus.ACTIVE,
-    // Additional domain-specific fields
-    val category: String? = null,  // e.g., for grouping components
-
     @Transient
     var imageUrl: String? = null  // Transient for presigned URL
 )

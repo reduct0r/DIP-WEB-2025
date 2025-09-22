@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ComponentRepository : JpaRepository<Component, Int> {
     fun findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(title: String, description: String): List<Component>
-    // Additional queries if needed
+    fun findByTitle(title: String): Component?
 }
