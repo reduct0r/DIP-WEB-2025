@@ -39,9 +39,9 @@
 
 <div class="footer">Reduct0r 2025</div>
 
-<a th:href="@{/request/1}" class="cart-icon">
+<a th:href="@{/request/1}" class="request-icon">
     <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'cart.png'" onerror="this.src='images/placeholder_85x89.png'">
-    <span class="cart-badge" th:if="${cartSize > 0}" th:text="${cartSize}"></span>
+    <span class="request-badge" th:if="${requestSize > 0}" th:text="${requestSize}"></span>
 </a>
 
 </body>

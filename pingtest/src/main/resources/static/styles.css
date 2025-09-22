@@ -128,7 +128,7 @@
 .header-main {
     height: 80px;
     background-color: #1A1B2E;
-    border-bottom: 3px solid #141424;
+    border-bottom: 2px solid #141424;
 }
 
 .logo-group {
@@ -237,7 +237,7 @@
     flex-shrink: 0;
 }
 
-.cart-icon {
+.request-icon {
     position: fixed;
     bottom: 50px;
     right: 40px;
@@ -247,12 +247,12 @@
     width: fit-content;
 }
 
-.cart-icon img {
+.request-icon img {
     width: 80%;
     height: auto;
 }
 
-.cart-badge {
+.request-badge {
     position: absolute;
     top: 15px;
     right: 45px;

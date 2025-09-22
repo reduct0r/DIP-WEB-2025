@@ -10,14 +10,12 @@
     <p class="title" th:text="${item.component.title ?: 'Неизвестно'}">База данных</p>
     <p class="description" th:text="${item.component.description ?: 'Нет описания'}">Хранение данных: SQL-запросы, чтение/запись в диск. Время доступа обусловливает при больших объемах.</p> <!-- Короткое description -->
 
-    <!-- Ввод времени -->
+    <!-- m-m поля-->
     <div class="time">
         <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'ping_icon.svg'" alt="icon" onerror="this.src='/images/placeholder_23x23.png'">
         <input type="number" th:value="${item.component.time}" class="mini-input" placeholder="мс">
         мс
     </div>
-
-    <!-- m-m поля справа -->
     <div class="mm-fields">
         <div class="priority">
             Приоритет

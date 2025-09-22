@@ -16,7 +16,7 @@ class ServiceController(val repository: ComponentRepository) {
         val components = repository.getComponents(filter)
         model.addAttribute("components", components)
         model.addAttribute("filter", filter ?: "")
-        model.addAttribute("cartSize", repository.getRequestItemCount(id = 1))
+        model.addAttribute("requestSize", repository.getRequestItemCount(id = 1))
         model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")
         return "main-page/main"
     }
@@ -30,7 +30,7 @@ class ServiceController(val repository: ComponentRepository) {
     }
 
     @GetMapping("/request/{id}")
-    fun viewCart(@PathVariable id: Int, model: Model): String {
+    fun viewRequest(@PathVariable id: Int, model: Model): String {
         val request = repository.getRequest(id) ?: throw RuntimeException("Request not found")
         model.addAttribute("request", request)
         model.addAttribute("minioBaseUrl", "http://localhost:9000/main/images/")

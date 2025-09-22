@@ -4,9 +4,10 @@ import com.dip.pingtest.domain.model.Component
 import com.dip.pingtest.domain.model.Request
 import com.dip.pingtest.domain.model.RequestComponent
 import org.springframework.stereotype.Repository
+import pingtest.domain.repository.ComponentRepository
 
 @Repository
-class ComponentRepository {
+class ComponentRepository: ComponentRepository {
     private val components = listOf(
         Component(1, "Кэш", "Хранение часто используемых данных в памяти для ускорения доступа.", "Кэширование играет ключевую роль в повышении производительности веб-приложений, уменьшая нагрузку на сервер и время отклика. Оно позволяет избежать повторных обращений к медленным источникам данных, таким как база данных или внешние API, храня копии результатов в быстром хранилище, например, в RAM. Типичное время отклика для кэша составляет около 10 мс, что делает его идеальным для оптимизации часто запрашиваемых ресурсов.", 10, "cache.png"),
         Component(2, "Бэкенд", "Серверная логика и обработка запросов от клиентов.", "Бэкенд отвечает за основную логику приложения, включая обработку запросов, бизнес-логику, аутентификацию, интеграцию с базами данных и внешними сервисами. Он генерирует динамический контент и отправляет ответы фронтенду. Время обработки на бэкенде зависит от сложности операций и может варьироваться от 20 до 150 мс для типичных запросов, влияя на общую скорость приложения.", 150, "backend.png"),
@@ -27,25 +28,25 @@ class ComponentRepository {
         )
     )
 
-    fun getComponents(filter: String? = null): List<Component> {
+    override fun getComponents(filter: String?): List<Component> {
         if (filter.isNullOrBlank()) return components
         return components.filter {
             it.title.contains(filter, ignoreCase = true) ||
                     it.time.toString().contains(filter) ||
-                    it.description.contains(filter, ignoreCase = true) ||
-                    it.longDescription.contains(filter, ignoreCase = true)
+                    it.description.contains(filter, ignoreCase = true)
         }
     }
 
-    fun getComponent(id: Int): Component? = components.find { it.id == id }
+    override fun getComponent(id: Int): Component? {
+        return components.find { it.id == id }
+    }
 
-    fun getRequestItemCount(id: Int): Int = requestItems[id]?.size ?: 0
+    override fun getRequestItemCount(id: Int): Int = requestItems[id]?.size ?: 0
 
-    fun getRequest(id: Int): Request? {
+    override fun getRequest(id: Int): Request? {
         val req = requests[id] ?: return null
         val items = requestItems[id] ?: emptyList()
-        val filledItems = items.map { it.copy(component = getComponent(it.componentId)) }
 
-        return req.copy(items = filledItems)
+        return req.copy(items = items)
     }
 }
