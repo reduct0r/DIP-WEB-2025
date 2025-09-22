@@ -46,7 +46,8 @@ class ComponentRepository: ComponentRepository {
     override fun getRequest(id: Int): Request? {
         val req = requests[id] ?: return null
         val items = requestItems[id] ?: emptyList()
+        val filledItems = items.map { it.copy(component = getComponent(it.componentId)) }
 
-        return req.copy(items = items)
+        return req.copy(items = filledItems)
     }
 }
