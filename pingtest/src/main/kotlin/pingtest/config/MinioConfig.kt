@@ -1,27 +1,29 @@
 package com.dip.pingtest.config
 
 import io.minio.MinioClient
-import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-class MinioConfig {
-
-    @Value("\${minio.url}")
-    private lateinit var url: String
-
-    @Value("\${minio.access-key}")
-    private lateinit var accessKey: String
-
-    @Value("\${minio.secret-key}")
-    private lateinit var secretKey: String
+@EnableConfigurationProperties(MinioProperties::class)  // This registers MinioProperties as a bean
+class MinioConfig(private val minioProperties: MinioProperties) {  // Inject MinioProperties here
 
     @Bean
     fun minioClient(): MinioClient {
         return MinioClient.builder()
-            .endpoint(url)
-            .credentials(accessKey, secretKey)
+            .endpoint(minioProperties.url)
+            .credentials(minioProperties.accessKey, minioProperties.secretKey)
             .build()
     }
 }
+
+// No changes needed here
+@ConfigurationProperties(prefix = "minio")
+data class MinioProperties(
+    val url: String,
+    val accessKey: String,
+    val secretKey: String,
+    val bucket: String
+)
