@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/request-styles.css">
+    <title>Request page</title>
+</head>
+<body>
+<div class="page-wrapper">
+    <div class="header-main">
+        <a th:href="@{/}" class="logo-group">
+            <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'icon.png'" alt="icon" onerror="this.src='/images/icon.png'">
+            <span class="logo-title">PINGTEST</span>
+        </a>
+    </div>
+
+    <div class="main-plate">
+        <div class="welcome-title">Заявка</div>
+
+        <div class="request-info">
+            <p>Номер: <span th:text="${request.id}"></span></p>
+            <p>Дата создания: <span th:text="${request.createdAt}"></span></p>
+        </div>
+
+        <div class="container-plate">
+            <div class="components-stack">
+                <div class="calculations-container">
+                    <p class="result-title">Итоговое время: <span th:text="${request.totalTime} + ' мс'"></span></p>  <!-- Результат вычислений -->
+                </div>
+                <div th:each="item : ${request.items}">
+                    <div th:replace="~{request-page/request-component :: request-component(${item})}"></div>
+                </div>
+
+                <div class="result-holder">
+                    <!--div class="calculate-button">GO</div-->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">Reduct0r 2025</div>
+
+</body>
+</html>

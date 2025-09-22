@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div th:fragment="card-component(component)" class="card-container">
+    <a th:href="@{/component/{id}(id=${component.id})}" class="card-link">
+        <div class="card-content-container">
+            <img src="images/placeholder_142x142.png" alt="placeholder" th:src="${minioBaseUrl} + ${component.image}" onerror="this.src='/images/placeholder_142x142.png'"/>
+            <p class="card-title" th:text="${component.title}">Название компонента</p>
+            <p class="description" th:text="${component.description}">Краткое описание компонента</p>
+            <div class="time">
+                <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'ping_icon.svg'" alt="ping icon" onerror="this.src='/images/placeholder_23x23.png'">
+                <span th:text="${component.time} + ' мс'">10 мс</span>
+                <!--div th:replace="~{main-page/add-button :: add-button(${details-page.id})}"></div--->
+            </div>
+        </div>
+    </a>
+</div>
+</body>
+</html>
