@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles-card-view.css">
+    <title th:text="${component.title} + ' - PINGTEST'">PINGTEST</title>
+</head>
+<body>
+<div class="page-wrapper">
+    <div class="header-main">
+        <a th:href="@{/}" class="logo-group">
+            <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'icon.png'" alt="icon" onerror="this.src='/images/icon.png'">
+            <span class="logo-title">PINGTEST</span>
+        </a>
+    </div>
+    <div class="info-board">
+        <div class="text-block">
+            <p class="title" th:text="${component.title}">Услуга</p>
+            <p class="short-description" th:text="${component.description}">Краткое описание</p>
+            <p class="description" th:text="${component.longDescription}">Описание</p>
+        </div>
+        <div class="image-holder">
+            <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + ${component.image}" alt="icon" onerror="this.src='/images/placeholder_142x142.png'">
+            <div class="time-holder">
+                <div class="time-component">
+                    <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'ping_icon.svg'" alt="ping icon" onerror="this.src='/images/placeholder_55x55.png'">
+                    <span th:text="${component.time} + ' мс'">10 мс</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <p class="upper-footer"></p>
+</div>
+</body>
+</html>
