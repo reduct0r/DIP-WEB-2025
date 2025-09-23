@@ -87,6 +87,19 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  # Добавление сервиса Adminer
+  adminer:
+    image: adminer:latest
+    container_name: adminer_lab
+    restart: always
+    ports:
+      - "8082:8080"
+    depends_on:
+      - postgres
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres_lab
+      ADMINER_DESIGN: galkaev
+
 ## По умолчанию в этой конфигурации используется локальный драйвер docker по умолчанию,
 ## Для пользовательских томов замените на конфигурацию драйвера тома.
 volumes:
@@ -98,4 +111,4 @@ volumes:
   data3-2:
   data4-1:
   data4-2:
-  postgres_data:  #volume для PostgreSQL данных
+  postgres_data:  # volume для PostgreSQL данных

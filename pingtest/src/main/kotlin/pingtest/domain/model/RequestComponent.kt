@@ -27,7 +27,7 @@ data class RequestComponent(
     val component: Component,
     var quantity: Int = 1,
     @Column(name = "order_number")
-    val orderNumber: Int = 0,
-    val componentGroup: String? = null,
-    val subtotalTime: Int = 0
+    var orderNumber: Int = 0,
+    var componentGroup: String? = null,
+    var subtotalTime: Int = 0
 )

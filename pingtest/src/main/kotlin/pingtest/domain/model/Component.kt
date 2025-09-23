@@ -10,7 +10,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "components")  // Services table
+@Table(name = "components")
 data class Component(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
@@ -19,9 +19,9 @@ data class Component(
     @Column(columnDefinition = "TEXT")
     val longDescription: String,
     val time: Int,
-    val image: String? = null,  // Nullable object name in MinIO
+    val image: String? = null,
     @Enumerated(EnumType.STRING)
     val status: ComponentStatus = ComponentStatus.ACTIVE,
     @Transient
-    var imageUrl: String? = null  // Transient for presigned URL
+    var imageUrl: String? = null
 )

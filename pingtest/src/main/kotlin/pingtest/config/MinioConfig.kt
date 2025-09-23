@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
-@EnableConfigurationProperties(MinioProperties::class)  // This registers MinioProperties as a bean
-class MinioConfig(private val minioProperties: MinioProperties) {  // Inject MinioProperties here
+@EnableConfigurationProperties(MinioProperties::class)
+class MinioConfig(private val minioProperties: MinioProperties) {
 
     @Bean
     fun minioClient(): MinioClient {
@@ -19,7 +19,6 @@ class MinioConfig(private val minioProperties: MinioProperties) {  // Inject Min
     }
 }
 
-// No changes needed here
 @ConfigurationProperties(prefix = "minio")
 data class MinioProperties(
     val url: String,

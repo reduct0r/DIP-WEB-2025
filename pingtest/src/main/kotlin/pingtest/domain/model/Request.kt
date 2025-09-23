@@ -31,7 +31,6 @@ data class Request(
     val moderator: User? = null,
 
     var totalTime: Int = 0,
-    val notes: String? = null
 ) {
     @OneToMany(mappedBy = "request", cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     val items: MutableList<RequestComponent> = mutableListOf()

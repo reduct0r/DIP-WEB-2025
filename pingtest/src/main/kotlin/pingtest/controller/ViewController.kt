@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.servlet.ModelAndView
 
 @Controller
 class ServiceController(
@@ -79,5 +80,12 @@ class ServiceController(
     fun deleteRequest(@PathVariable id: Int): String {
         requestService.logicalDeleteRequest(id)
         return "redirect:/"
+    }
+
+    @ExceptionHandler(RuntimeException::class)
+    fun handleException(request: HttpServletRequest, ex: RuntimeException): ModelAndView {
+        val modelAndView = ModelAndView("request-page/error")
+        modelAndView.addObject("message", ex.message ?: "Произошла неизвестная ошибка")
+        return modelAndView
     }
 }

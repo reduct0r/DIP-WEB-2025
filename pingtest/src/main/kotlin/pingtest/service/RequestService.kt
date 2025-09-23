@@ -50,7 +50,7 @@ class RequestService(
         val existingItem = request.items.find { it.componentId == componentId }
         if (existingItem != null) {
             existingItem.quantity += 1
-            request.totalTime += component.time
+            request.totalTime = calculateTotalTime(request)
         } else {
             val order = request.items.size + 1
             val subtotal = component.time * 1
@@ -65,10 +65,49 @@ class RequestService(
                 subtotalTime = subtotal
             )
             request.items.add(item)
-            request.totalTime += subtotal
+            request.totalTime = calculateTotalTime(request)
         }
 
         return requestRepository.save(request)
+    }
+
+    @Transactional
+    fun updateRequestItem(requestId: Int, componentId: Int, quantity: Int, orderNumber: Int, componentGroup: String?): Request {
+        val request = requestRepository.findById(requestId).orElseThrow { RuntimeException("Request not found") }
+        val item = request.items.find { it.componentId == componentId } ?: throw RuntimeException("Item not found")
+
+        item.quantity = quantity
+        item.orderNumber = orderNumber
+        item.componentGroup = componentGroup
+
+        request.totalTime = calculateTotalTime(request)
+
+        return requestRepository.save(request)
+    }
+
+    private fun calculateTotalTime(request: Request): Int {
+        val dbTime = componentRepository.findByTitle("БД")?.time ?: 0
+        val cacheTime = componentRepository.findByTitle("Кэш")?.time ?: 0
+
+        // Сортировка items по orderNumber (приоритет)
+        val sortedItems = request.items.sortedBy { it.orderNumber }
+        // Группировка по приоритету (orderNumber)
+        val grouped = sortedItems.groupBy { it.orderNumber }
+
+        var total = 0
+
+        // Суммирование по группам приоритетов последовательно
+        grouped.keys.sorted().forEach { priority ->
+            val groupSum = grouped[priority]!!.sumOf { item ->
+                var subtotal = item.component.time * item.quantity
+                if (item.componentGroup == "БД") subtotal += dbTime
+                if (item.componentGroup == "Кэш") subtotal += cacheTime
+                subtotal
+            }
+            total += groupSum
+        }
+
+        return total
     }
 
     fun logicalDeleteRequest(id: Int) {
