@@ -47,24 +47,26 @@ class RequestService(
             request = requestRepository.save(request)
         }
 
-        if (request.items.any { it.componentId == componentId }) {
-            throw RuntimeException("Component already in request")
+        val existingItem = request.items.find { it.componentId == componentId }
+        if (existingItem != null) {
+            existingItem.quantity += 1
+            request.totalTime += component.time
+        } else {
+            val order = request.items.size + 1
+            val subtotal = component.time * 1
+            val item = RequestComponent(
+                requestId = request.id,
+                componentId = component.id,
+                request = request,
+                component = component,
+                quantity = 1,
+                orderNumber = order,
+                componentGroup = null,
+                subtotalTime = subtotal
+            )
+            request.items.add(item)
+            request.totalTime += subtotal
         }
-
-        val order = request.items.size + 1
-        val subtotal = component.time * 1
-        val item = RequestComponent(
-            requestId = request.id,
-            componentId = component.id,
-            request = request,
-            component = component,
-            quantity = 1,
-            orderNumber = order,
-            componentGroup = null,
-            subtotalTime = subtotal
-        )
-        request.items.add(item)
-        request.totalTime += subtotal
 
         return requestRepository.save(request)
     }

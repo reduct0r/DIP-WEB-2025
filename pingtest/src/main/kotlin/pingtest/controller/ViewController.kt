@@ -24,7 +24,6 @@ class ServiceController(
         model.addAttribute("filter", filter ?: "")
         model.addAttribute("draftRequestId", draftRequestId)
         model.addAttribute("requestSize", requestSize)
-        model.addAttribute("minioBaseUrl", "")
 
         model.addAttribute("iconUrl", componentService.getStaticImageUrl("icon.png"))
         model.addAttribute("searchIconUrl", componentService.getStaticImageUrl("search_icon.svg"))
@@ -47,7 +46,6 @@ class ServiceController(
         model.addAttribute("pingIconUrl", componentService.getStaticImageUrl("ping_icon.svg"))
         model.addAttribute("iconUrl", componentService.getStaticImageUrl("icon.png"))
         model.addAttribute("requestIconUrl", componentService.getStaticImageUrl("cart.png"))
-        // Add other attributes if needed for the details page header/footer
 
         return "details-page/component-detailed"
     }
@@ -59,9 +57,8 @@ class ServiceController(
             throw RuntimeException("Deleted requests cannot be viewed")
         }
         model.addAttribute("request", request)
-        model.addAttribute("minioBaseUrl", "") // If needed for images
-        model.addAttribute("iconUrl", componentService.getStaticImageUrl("icon.png")) // For header
-        // Optionally add draftRequestId and requestSize if you want the cart icon on this page too
+        model.addAttribute("iconUrl", componentService.getStaticImageUrl("icon.png"))
+        model.addAttribute("pingIconUrl", componentService.getStaticImageUrl("ping_icon.svg"))
 
         return "request-page/request"
     }

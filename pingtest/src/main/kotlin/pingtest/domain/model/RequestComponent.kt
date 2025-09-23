@@ -25,9 +25,9 @@ data class RequestComponent(
     @MapsId("componentId")
     @JoinColumn(name = "component_id")
     val component: Component,
-    val quantity: Int = 1,
+    var quantity: Int = 1,
     @Column(name = "order_number")
     val orderNumber: Int = 0,
-    val componentGroup: String? = null,  // Renamed from 'group'
+    val componentGroup: String? = null,
     val subtotalTime: Int = 0
 )
