@@ -10,7 +10,7 @@
 <div class="page-wrapper">
     <div class="header-main">
         <a th:href="@{/}" class="logo-group">
-            <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'icon.png'" alt="icon" onerror="this.src='/images/icon.png'">
+            <img th:src="${minioBaseUrl} + 'icon.png'" alt="icon" onerror="this.src='/images/icon.png'">
             <span class="logo-title">PINGTEST</span>
         </a>
     </div>
@@ -34,6 +34,7 @@
 
                 <div class="result-holder">
                     <!--div class="calculate-button">GO</div-->
+                    <div th:replace="~{request-page/delete-button :: delete-button(${request.id})}"></div>
                 </div>
             </div>
         </div>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <link rel="stylesheet" href="/request/styles.css">
+</head>
+<body>
+<div th:fragment="delete-button(requestId)" class="button-container">
+    <form th:action="@{/request/delete/{id}(id=${requestId})}" method="post">
+        <button type="submit" class="button-content-container" onclick="event.stopPropagation(); return confirm('Вы уверены, что хотите удалить заявку?');">
+            <img th:src="${deleteIconUrl}" alt="delete" onerror="this.src='/images/placeholder_25x25.png'">
+            Удалить заявку
+        </button>
+    </form>
+</div>
+</body>
+</html>

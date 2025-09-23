@@ -16,7 +16,8 @@ class ServiceController(
 
     @GetMapping("/")
     fun mainPage(@RequestParam(required = false) filter: String?, model: Model): String {
-        val userId = 1 // Hardcoded for demo; in production, use authentication
+        //TODO hardcoded user
+        val userId = 1
         val components = componentService.getComponents(filter)
         val draftRequestId = requestService.getDraftRequestIdForUser(userId)
         val requestSize = requestService.getRequestItemCountForUser(userId)
@@ -36,7 +37,8 @@ class ServiceController(
 
     @GetMapping("/component/{id}")
     fun viewService(@PathVariable id: Int, model: Model): String {
-        val userId = 1 // Hardcoded for demo; in production, use authentication
+        //TODO hardcoded user
+        val userId = 1
         val component = componentService.getComponent(id) ?: throw RuntimeException("Component not found")
         val draftRequestId = requestService.getDraftRequestIdForUser(userId)
         val requestSize = requestService.getRequestItemCountForUser(userId)
@@ -50,23 +52,25 @@ class ServiceController(
         return "details-page/component-detailed"
     }
 
-    @GetMapping("/request/{id}")
-    fun viewRequest(@PathVariable id: Int, model: Model): String {
-        val request = requestService.getRequest(id) ?: throw RuntimeException("Request not found")
+    @GetMapping("/request")
+    fun viewRequest(model: Model): String {
+        //TODO hardcoded user
+        val request = requestService.getDraftRequestForUser(userId = 1) ?: throw RuntimeException("Request not found")
         if (request.status == RequestStatus.DELETED) {
             throw RuntimeException("Deleted requests cannot be viewed")
         }
         model.addAttribute("request", request)
         model.addAttribute("iconUrl", componentService.getStaticImageUrl("icon.png"))
         model.addAttribute("pingIconUrl", componentService.getStaticImageUrl("ping_icon.svg"))
+        model.addAttribute("deleteIconUrl", componentService.getStaticImageUrl("delete_icon.svg"))
 
         return "request-page/request"
     }
 
     @PostMapping("/request/add/{componentId}")
     fun addToRequest(@PathVariable componentId: Int, httpRequest: HttpServletRequest): String {
-        val userId = 1 // Hardcoded for demo; in production, use authentication
-        requestService.addComponentToRequest(userId, componentId)
+        //TODO hardcoded user
+        requestService.addComponentToRequest(userId = 1, componentId)
         val referer = httpRequest.getHeader("Referer") ?: "/"
         return "redirect:$referer"
     }

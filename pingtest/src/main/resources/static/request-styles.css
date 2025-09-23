@@ -230,7 +230,7 @@ body, html {
     flex-direction: row;
     background-color: #05061F;
     height: auto;
-    justify-content: left;
+    justify-content: flex-end;  /* Изменено на flex-end, чтобы кнопка была справа */
     align-items: flex-start;
     width: 100%;
 }
@@ -313,4 +313,34 @@ body, html {
 
 .calculate-button:hover::before {
     border-color: #881af0;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.button-content-container {
+    background-color: #b01515;
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-family: 'Roboto Mono', monospace;
+    cursor: pointer;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease;;
+}
+
+.button-content-container:hover {
+    background-color: #7f0e0e;
+}
+
+.button-content-container img {
+    width: 25px;
+    height: 25px;
 }
