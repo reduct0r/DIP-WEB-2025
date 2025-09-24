@@ -53,10 +53,9 @@ class ServiceController(
         return "details-page/component-detailed"
     }
 
-    @GetMapping("/request")
-    fun viewRequest(model: Model): String {
-        //TODO hardcoded user
-        val request = requestService.getDraftRequestForUser(userId = 1) ?: throw RuntimeException("Request not found")
+    @GetMapping("/request/{id}")
+    fun viewRequest(@PathVariable id: Int, model: Model): String {
+        val request = requestService.getRequest(id) ?: throw RuntimeException("Request not found")
         if (request.status == RequestStatus.DELETED) {
             throw RuntimeException("Deleted requests cannot be viewed")
         }
