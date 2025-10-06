@@ -24,7 +24,7 @@ data class PingTimeComponent(
     @ManyToOne
     @MapsId("componentId")
     @JoinColumn(name = "component_id")
-    val component: Component,
+    val component: ServerComponent,
     var quantity: Int = 1,
     @Column(name = "order_number")
     var orderNumber: Int = 0,

@@ -1,5 +1,5 @@
 package com.dip.pingtest.domain.model
 
-enum class ComponentStatus {
+enum class ServerComponentStatus {
     ACTIVE, DELETED
 }

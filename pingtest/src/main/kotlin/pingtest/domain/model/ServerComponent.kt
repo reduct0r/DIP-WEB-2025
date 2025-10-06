@@ -10,8 +10,8 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "components")
-data class Component(
+@Table(name = "server_components")
+data class ServerComponent(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
     val title: String,
@@ -21,7 +21,7 @@ data class Component(
     val time: Int,
     val image: String? = null,
     @Enumerated(EnumType.STRING)
-    val status: ComponentStatus = ComponentStatus.ACTIVE,
+    val status: ServerComponentStatus = ServerComponentStatus.ACTIVE,
     @Transient
     var imageUrl: String? = null
 )

@@ -19,7 +19,7 @@
         <div class="welcome-title">Расчет времени отклика веб-приложения</div>
         <div class="search-holder">
             <form th:action="@{/}" method="get" class="search-bar">
-                <input type="text" name="filter" th:value="${filter}" placeholder="Поиск услуг">
+                <input type="text" name="filter" th:value="${filter}" placeholder="Поиск серверных компонентов">
                 <button type="submit" class="search-button">
                     <img th:src="${searchIconUrl}" alt="icon" onerror="this.src='images/placeholder_29x29.png'">
                 </button>
@@ -45,11 +45,6 @@
             <img th:src="${requestIconUrl}" onerror="this.src='images/placeholder_85x89.png'">
             <span class="request-badge" th:text="${requestSize}"></span>
         </a>
-    </th:block>
-    <th:block th:unless="${draftRequestId != null and requestSize > 0}">
-        <div class="request-icon disabled">
-            <img th:src="${requestIconUrl}" onerror="this.src='images/placeholder_85x89.png'">
-        </div>
     </th:block>
 </div>
 
