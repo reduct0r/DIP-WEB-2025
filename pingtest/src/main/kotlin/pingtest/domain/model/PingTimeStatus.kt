@@ -1,5 +1,5 @@
 package com.dip.pingtest.domain.model
 
-enum class RequestStatus {
+enum class PingTimeStatus {
     DRAFT, DELETED, FORMED, COMPLETED, REJECTED, ARCHIVED
 }

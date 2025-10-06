@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/request-styles.css">
-    <title>Request page</title>
+    <link rel="stylesheet" href="/ping-time-styles.css">
+    <title>ping-time page</title>
 </head>
 <body>
 <div class="page-wrapper">
@@ -18,23 +18,23 @@
     <div class="main-plate">
         <div class="welcome-title">Заявка</div>
 
-        <!--div class="request-info">
-            <p>Номер: <span th:text="${request.id}"></span></p>
-            <p>Дата создания: <span th:text="${#temporals.format(request.createdAt, 'dd.MM.yyyy HH:mm:ss')}"></span></p>
-        <div-->
+        <div class="request-info">
+            <p>Номер: <span th:text="${ping_time.id}"></span></p>
+            <p>Дата создания: <span th:text="${#temporals.format(ping_time.createdAt, 'dd.MM.yyyy HH:mm:ss')}"></span></p>
+        </div>
 
         <div class="container-plate">
             <div class="components-stack">
                 <div class="calculations-container">
-                    <p class="result-title">Итоговое время: <span th:text="${request.totalTime} + ' мс'"></span></p>  <!-- Результат вычислений -->
+                    <p class="result-title">Итоговое время: <span th:text="${ping_time.totalTime} + ' мс'"></span></p>  <!-- Результат вычислений -->
                 </div>
-                <div th:each="item : ${request.items}">
-                    <div th:replace="~{request-page/request-component :: request-component(${item})}"></div>
+                <div th:each="item : ${ping_time.items}">
+                    <div th:replace="~{ping-time-page/ping-time-component :: ping-time-component(${item})}"></div>
                 </div>
 
                 <div class="result-holder">
                     <!--div class="calculate-button">GO</div-->
-                    <div th:replace="~{request-page/delete-button :: delete-button(${request.id})}"></div>
+                    <div th:replace="~{ping-time-page/delete-button :: delete-button(${ping_time.id})}"></div>
                 </div>
             </div>
         </div>

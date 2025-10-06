@@ -10,17 +10,17 @@ import jakarta.persistence.MapsId
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "request_components")
-@IdClass(RequestComponentId::class)
-data class RequestComponent(
+@Table(name = "ping_time_components")
+@IdClass(PingTimeComponentId::class)
+data class PingTimeComponent(
     @Id
-    val requestId: Int,
+    val pingTimeId: Int,
     @Id
     val componentId: Int,
     @ManyToOne
-    @MapsId("requestId")
-    @JoinColumn(name = "request_id")
-    val request: Request,
+    @MapsId("pingTimeId")
+    @JoinColumn(name = "ping_time_id")
+    val pingTime: PingTime,
     @ManyToOne
     @MapsId("componentId")
     @JoinColumn(name = "component_id")

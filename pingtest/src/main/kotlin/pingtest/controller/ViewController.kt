@@ -1,6 +1,6 @@
 package com.dip.pingtest.controller
 
-import com.dip.pingtest.domain.model.RequestStatus
+import com.dip.pingtest.domain.model.PingTimeStatus
 import com.dip.pingtest.service.ComponentService
 import com.dip.pingtest.service.RequestService
 import jakarta.servlet.http.HttpServletRequest
@@ -12,7 +12,7 @@ import org.springframework.web.servlet.ModelAndView
 @Controller
 class ServiceController(
     private val componentService: ComponentService,
-    private val requestService: RequestService
+    private val pingTimeService: RequestService
 ) {
 
     @GetMapping("/")
@@ -20,8 +20,8 @@ class ServiceController(
         //TODO hardcoded user
         val userId = 1
         val components = componentService.getComponents(filter)
-        val draftRequestId = requestService.getDraftRequestIdForUser(userId)
-        val requestSize = requestService.getRequestItemCountForUser(userId)
+        val draftRequestId = pingTimeService.getDraftRequestIdForUser(userId)
+        val requestSize = pingTimeService.getRequestItemCountForUser(userId)
         model.addAttribute("components", components)
         model.addAttribute("filter", filter ?: "")
         model.addAttribute("draftRequestId", draftRequestId)
@@ -41,8 +41,8 @@ class ServiceController(
         //TODO hardcoded user
         val userId = 1
         val component = componentService.getComponent(id) ?: throw RuntimeException("Component not found")
-        val draftRequestId = requestService.getDraftRequestIdForUser(userId)
-        val requestSize = requestService.getRequestItemCountForUser(userId)
+        val draftRequestId = pingTimeService.getDraftRequestIdForUser(userId)
+        val requestSize = pingTimeService.getRequestItemCountForUser(userId)
         model.addAttribute("component", component)
         model.addAttribute("draftRequestId", draftRequestId)
         model.addAttribute("requestSize", requestSize)
@@ -53,37 +53,37 @@ class ServiceController(
         return "details-page/component-detailed"
     }
 
-    @GetMapping("/request/{id}")
+    @GetMapping("/ping-time/{id}")
     fun viewRequest(@PathVariable id: Int, model: Model): String {
-        val request = requestService.getRequest(id) ?: throw RuntimeException("Request not found")
-        if (request.status == RequestStatus.DELETED) {
+        val pingTime = pingTimeService.getRequest(id) ?: throw RuntimeException("Request not found")
+        if (pingTime.status == PingTimeStatus.DELETED) {
             throw RuntimeException("Deleted requests cannot be viewed")
         }
-        model.addAttribute("request", request)
+        model.addAttribute("ping_time", pingTime)
         model.addAttribute("iconUrl", componentService.getStaticImageUrl("icon.png"))
         model.addAttribute("pingIconUrl", componentService.getStaticImageUrl("ping_icon.svg"))
         model.addAttribute("deleteIconUrl", componentService.getStaticImageUrl("delete_icon.svg"))
 
-        return "request-page/request"
+        return "ping-time-page/ping-time"
     }
 
-    @PostMapping("/request/add/{componentId}")
+    @PostMapping("/ping-time/add/{componentId}")
     fun addToRequest(@PathVariable componentId: Int, httpRequest: HttpServletRequest): String {
         //TODO hardcoded user
-        requestService.addComponentToRequest(userId = 1, componentId)
+        pingTimeService.addComponentToRequest(userId = 1, componentId)
         val referer = httpRequest.getHeader("Referer") ?: "/"
         return "redirect:$referer"
     }
 
-    @PostMapping("/request/delete/{id}")
+    @PostMapping("/ping-time/delete/{id}")
     fun deleteRequest(@PathVariable id: Int): String {
-        requestService.logicalDeleteRequest(id)
+        pingTimeService.logicalDeleteRequest(id)
         return "redirect:/"
     }
 
     @ExceptionHandler(RuntimeException::class)
     fun handleException(request: HttpServletRequest, ex: RuntimeException): ModelAndView {
-        val modelAndView = ModelAndView("request-page/error")
+        val modelAndView = ModelAndView("ping-time-page/error")
         modelAndView.addObject("message", ex.message ?: "Произошла неизвестная ошибка")
         return modelAndView
     }

@@ -41,7 +41,7 @@
 
 <div>
     <th:block th:if="${draftRequestId != null and requestSize > 0}">
-        <a th:href="@{/request/{id}(id=${draftRequestId})}" class="request-icon">
+        <a th:href="@{/ping-time/{id}(id=${draftRequestId})}" class="request-icon">
             <img th:src="${requestIconUrl}" onerror="this.src='images/placeholder_85x89.png'">
             <span class="request-badge" th:text="${requestSize}"></span>
         </a>

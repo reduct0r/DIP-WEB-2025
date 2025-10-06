@@ -5,7 +5,7 @@
 </head>
 <body>
 <div th:fragment="add-button(componentId)" class="button-container">
-    <form th:action="@{/request/add/{componentId}(componentId=${componentId})}" method="post">
+    <form th:action="@{/ping-time/add/{componentId}(componentId=${componentId})}" method="post">
         <button type="submit" class="button-content-container" onclick="event.stopPropagation()">
             <img th:src="${plusCircleUrl}" alt="placeholder" onerror="this.src='/images/placeholder_25x25.png'">
             Добавить

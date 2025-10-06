@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/request-styles.css">
+    <link rel="stylesheet" href="/ping-time-styles.css">
     <title>Ошибка</title>
 </head>
 <body>
@@ -19,13 +19,6 @@
         <div class="welcome-title">Ошибка</div>
         <div class="request-info">
             <p>Сообщение об ошибке: <span th:text="${message} ?: 'Заявка не найдена'"></span></p>
-        </div>
-        <div class="container-plate">
-            <div class="components-stack">
-                <div class="result-holder">
-                    <a th:href="@{/}" class="button-content-container">Вернуться на главную</a>
-                </div>
-            </div>
         </div>
     </div>
 </div>

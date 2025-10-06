@@ -14,12 +14,12 @@ import jakarta.persistence.Table
 import java.time.LocalDateTime
 
 @Entity
-@Table(name = "requests")
-data class Request(
+@Table(name = "ping_times")
+data class PingTime(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
     @Enumerated(EnumType.STRING)
-    val status: RequestStatus,
+    val status: PingTimeStatus,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     @ManyToOne
     @JoinColumn(name = "creator_id", nullable = false)
@@ -32,6 +32,6 @@ data class Request(
 
     var totalTime: Int = 0,
 ) {
-    @OneToMany(mappedBy = "request", cascade = [CascadeType.PERSIST, CascadeType.MERGE])
-    val items: MutableList<RequestComponent> = mutableListOf()
+    @OneToMany(mappedBy = "pingTime", cascade = [CascadeType.PERSIST, CascadeType.MERGE])
+    val items: MutableList<PingTimeComponent> = mutableListOf()
 }

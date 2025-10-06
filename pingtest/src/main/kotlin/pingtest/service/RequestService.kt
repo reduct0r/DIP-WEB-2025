@@ -16,20 +16,20 @@ class RequestService(
     private val componentService: ComponentService,
     private val jdbcTemplate: JdbcTemplate
 ) {
-    fun getRequest(id: Int): Request? {
+    fun getRequest(id: Int): PingTime? {
         return requestRepository.findById(id).orElse(null)?.apply {
             items.forEach { it.component.imageUrl = componentService.generatePresignedUrl(it.component.image) }
         }
     }
 
-    fun getDraftRequestForUser(userId: Int): Request? {
-        return requestRepository.findByCreatorIdAndStatus(userId, RequestStatus.DRAFT)?.apply {
+    fun getDraftRequestForUser(userId: Int): PingTime? {
+        return requestRepository.findByCreatorIdAndStatus(userId, PingTimeStatus.DRAFT)?.apply {
             items.forEach { it.component.imageUrl = componentService.generatePresignedUrl(it.component.image) }
         }
     }
 
     fun getDraftRequestIdForUser(userId: Int): Int? {
-        return requestRepository.findByCreatorIdAndStatus(userId, RequestStatus.DRAFT)?.id
+        return requestRepository.findByCreatorIdAndStatus(userId, PingTimeStatus.DRAFT)?.id
     }
 
     fun getRequestItemCountForUser(userId: Int): Int {
@@ -37,13 +37,13 @@ class RequestService(
     }
 
     @Transactional
-    fun addComponentToRequest(userId: Int, componentId: Int): Request {
+    fun addComponentToRequest(userId: Int, componentId: Int): PingTime {
         val component = componentRepository.findById(componentId).orElseThrow { RuntimeException("Component not found") }
-        var request = requestRepository.findByCreatorIdAndStatus(userId, RequestStatus.DRAFT)
+        var request = requestRepository.findByCreatorIdAndStatus(userId, PingTimeStatus.DRAFT)
 
         if (request == null) {
             val creator = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
-            request = Request(status = RequestStatus.DRAFT, creator = creator)
+            request = PingTime(status = PingTimeStatus.DRAFT, creator = creator)
             request = requestRepository.save(request)
         }
 
@@ -54,10 +54,10 @@ class RequestService(
         } else {
             val order = request.items.size + 1
             val subtotal = component.time * 1
-            val item = RequestComponent(
-                requestId = request.id,
+            val item = PingTimeComponent(
+                pingTimeId = request.id,
                 componentId = component.id,
-                request = request,
+                pingTime = request,
                 component = component,
                 quantity = 1,
                 orderNumber = order,
@@ -72,7 +72,7 @@ class RequestService(
     }
 
     @Transactional
-    fun updateRequestItem(requestId: Int, componentId: Int, quantity: Int, orderNumber: Int, componentGroup: String?): Request {
+    fun updateRequestItem(requestId: Int, componentId: Int, quantity: Int, orderNumber: Int, componentGroup: String?): PingTime {
         val request = requestRepository.findById(requestId).orElseThrow { RuntimeException("Request not found") }
         val item = request.items.find { it.componentId == componentId } ?: throw RuntimeException("Item not found")
 
@@ -85,12 +85,12 @@ class RequestService(
         return requestRepository.save(request)
     }
 
-    private fun calculateTotalTime(request: Request): Int {
+    private fun calculateTotalTime(pingTime: PingTime): Int {
         val dbTime = componentRepository.findByTitle("БД")?.time ?: 0
         val cacheTime = componentRepository.findByTitle("Кэш")?.time ?: 0
 
         // Сортировка items по orderNumber (приоритет)
-        val sortedItems = request.items.sortedBy { it.orderNumber }
+        val sortedItems = pingTime.items.sortedBy { it.orderNumber }
         // Группировка по приоритету (orderNumber)
         val grouped = sortedItems.groupBy { it.orderNumber }
 
@@ -112,8 +112,8 @@ class RequestService(
 
     fun logicalDeleteRequest(id: Int) {
         jdbcTemplate.update(
-            "UPDATE requests SET status = ? WHERE id = ?",
-            RequestStatus.DELETED.name, id
+            "UPDATE ping_times SET status = ? WHERE id = ?",
+            PingTimeStatus.DELETED.name, id
         )
     }
 }
