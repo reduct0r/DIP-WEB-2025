@@ -40,7 +40,7 @@ class ViewController(
     fun viewService(@PathVariable id: Int, model: Model): String {
         //TODO hardcoded user
         val userId = 1
-        val component = componentService.getComponent(id) ?: throw RuntimeException("Component not found")
+        val component = componentService.getComponent(id)
         val draftRequestId = pingTimeService.getDraftRequestIdForUser(userId)
         val requestSize = pingTimeService.getRequestItemCountForUser(userId)
         model.addAttribute("component", component)
