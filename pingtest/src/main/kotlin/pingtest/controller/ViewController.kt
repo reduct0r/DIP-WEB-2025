@@ -55,9 +55,9 @@ class ServiceController(
 
     @GetMapping("/ping-time/{id}")
     fun viewRequest(@PathVariable id: Int, model: Model): String {
-        val pingTime = pingTimeService.getRequest(id) ?: throw RuntimeException("Request not found")
+        val pingTime = pingTimeService.getRequest(id) ?: throw RuntimeException("Запрос отклик сервера не найден")
         if (pingTime.status == PingTimeStatus.DELETED) {
-            throw RuntimeException("Deleted requests cannot be viewed")
+            throw RuntimeException("Удаленный расчет отклика сервера")
         }
         model.addAttribute("ping_time", pingTime)
         model.addAttribute("iconUrl", componentService.getStaticImageUrl("icon.png"))
