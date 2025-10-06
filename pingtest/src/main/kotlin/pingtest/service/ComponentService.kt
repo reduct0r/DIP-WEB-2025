@@ -1,12 +1,18 @@
 package com.dip.pingtest.service
 
 import com.dip.pingtest.config.MinioProperties
-import com.dip.pingtest.domain.model.*
+import com.dip.pingtest.domain.model.ServerComponent
+import com.dip.pingtest.domain.model.ServerComponentStatus
 import com.dip.pingtest.domain.repository.ComponentRepository
+import com.dip.pingtest.infrastructure.dto.ComponentDTO
 import io.minio.GetPresignedObjectUrlArgs
 import io.minio.MinioClient
+import io.minio.PutObjectArgs
+import io.minio.RemoveObjectArgs
 import io.minio.http.Method
 import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
+import java.util.UUID
 
 @Service
 class ComponentService(
@@ -14,36 +20,108 @@ class ComponentService(
     private val minioClient: MinioClient,
     private val minioProperties: MinioProperties
 ) {
-    fun getComponents(filter: String?): List<ServerComponent> {
+    fun getComponentsAsDomain(filter: String?): List<ServerComponent> {
         val components = if (filter.isNullOrBlank()) {
-            componentRepository.findAll()
+            componentRepository.findAll().filter { it.status == ServerComponentStatus.ACTIVE }
         } else {
             componentRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(filter, filter)
+                .filter { it.status == ServerComponentStatus.ACTIVE }
         }
         components.forEach { it.imageUrl = generatePresignedUrl(it.image) }
         return components
     }
 
-    fun getComponent(id: Int): ServerComponent? {
+    fun getComponentAsDomain(id: Int): ServerComponent? {
         val component = componentRepository.findById(id).orElse(null)
+        if (component?.status != ServerComponentStatus.ACTIVE) return null
         component?.imageUrl = generatePresignedUrl(component.image)
         return component
     }
 
-    fun getStaticImageUrl(imageName: String): String? {
-        return generatePresignedUrl(imageName)
+    fun getComponents(filter: String?): List<ComponentDTO> {
+        val components = if (filter.isNullOrBlank()) {
+            componentRepository.findAll().filter { it.status == ServerComponentStatus.ACTIVE }
+        } else {
+            componentRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(filter, filter)
+                .filter { it.status == ServerComponentStatus.ACTIVE }
+        }
+        return components.map { toDTO(it) }
+    }
+
+    fun getComponent(id: Int): ComponentDTO {
+        val component = componentRepository.findById(id).orElseThrow { RuntimeException("Component not found") }
+        if (component.status != ServerComponentStatus.ACTIVE) throw RuntimeException("Component deleted")
+        return toDTO(component)
+    }
+
+    fun createComponent(dto: ComponentDTO): ComponentDTO {
+        val component = ServerComponent(
+            title = dto.title,
+            description = dto.description,
+            longDescription = dto.longDescription,
+            time = dto.time
+        )
+        val saved = componentRepository.save(component)
+        return toDTO(saved)
+    }
+
+    fun updateComponent(id: Int, dto: ComponentDTO): ComponentDTO {
+        val component = componentRepository.findById(id).orElseThrow { RuntimeException("Component not found") }
+        if (component.status != ServerComponentStatus.ACTIVE) throw RuntimeException("Component deleted")
+        component.title = dto.title
+        component.description = dto.description
+        component.longDescription = dto.longDescription
+        component.time = dto.time
+        val saved = componentRepository.save(component)
+        return toDTO(saved)
+    }
+
+    fun deleteComponent(id: Int) {
+        val component = componentRepository.findById(id).orElseThrow { RuntimeException("Component not found") }
+        component.image?.let { removeFromMinio(it) }
+        component.status = ServerComponentStatus.DELETED
+        componentRepository.save(component)
+    }
+
+    fun uploadImage(id: Int, file: MultipartFile): String {
+        val component = componentRepository.findById(id).orElseThrow { RuntimeException("Component not found") }
+        if (component.status != ServerComponentStatus.ACTIVE) throw RuntimeException("Component deleted")
+        val extension = file.originalFilename?.substringAfterLast(".") ?: "jpg"
+        val objectName = "${UUID.randomUUID()}.$extension" // Latin name
+        component.image?.let { removeFromMinio(it) }
+        minioClient.putObject(
+            PutObjectArgs.builder()
+                .bucket(minioProperties.bucket)
+                .`object`(objectName)
+                .stream(file.inputStream, file.size, -1)
+                .contentType(file.contentType)
+                .build()
+        )
+        component.image = objectName
+        componentRepository.save(component)
+        return generatePresignedUrl(objectName) ?: throw RuntimeException("Failed to generate URL")
     }
 
     fun generatePresignedUrl(imageName: String?): String? {
         if (imageName == null) return null
-        val link = minioClient.getPresignedObjectUrl(
+        return minioClient.getPresignedObjectUrl(
             GetPresignedObjectUrlArgs.builder()
                 .method(Method.GET)
                 .bucket(minioProperties.bucket)
                 .`object`(imageName)
+                .expiry(60 * 60 * 24) // 24 hours
                 .build()
         )
-        println(link)
-        return link
-}
+    }
+
+    private fun removeFromMinio(objectName: String) {
+        minioClient.removeObject(
+            RemoveObjectArgs.builder().bucket(minioProperties.bucket).`object`(objectName).build()
+        )
+    }
+
+    private fun toDTO(component: ServerComponent): ComponentDTO = ComponentDTO(
+        component.id, component.title, component.description, component.longDescription,
+        component.time, generatePresignedUrl(component.image)
+    )
 }

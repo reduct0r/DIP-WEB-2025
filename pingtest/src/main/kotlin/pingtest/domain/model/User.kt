@@ -11,7 +11,7 @@ import jakarta.persistence.Table
 data class User(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
-    val username: String,
-    val password: String,
+    var username: String,
+    var password: String,
     val isModerator: Boolean = false
 )

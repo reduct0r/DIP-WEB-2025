@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
 
 @Repository
-interface RequestRepository : JpaRepository<PingTime, Int> {
+interface PingTimeRepository : JpaRepository<PingTime, Int> {
     fun findByCreatorIdAndStatus(creatorId: Int, status: PingTimeStatus): PingTime?
     fun findAllByStatusNotInAndFormationDateBetween(
         statuses: List<PingTimeStatus>,

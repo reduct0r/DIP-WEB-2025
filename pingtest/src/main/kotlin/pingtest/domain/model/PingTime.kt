@@ -19,16 +19,16 @@ data class PingTime(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
     @Enumerated(EnumType.STRING)
-    val status: PingTimeStatus,
+    var status: PingTimeStatus,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     @ManyToOne
     @JoinColumn(name = "creator_id", nullable = false)
     val creator: User,
-    val formationDate: LocalDateTime? = null,
-    val completionDate: LocalDateTime? = null,
+    var formationDate: LocalDateTime? = null,
+    var completionDate: LocalDateTime? = null,
     @ManyToOne
     @JoinColumn(name = "moderator_id")
-    val moderator: User? = null,
+    var moderator: User? = null,
 
     var totalTime: Int = 0,
 ) {

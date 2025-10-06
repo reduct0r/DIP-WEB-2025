@@ -14,14 +14,14 @@ import jakarta.persistence.Table
 data class ServerComponent(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
-    val title: String,
-    val description: String,
+    var title: String,
+    var description: String,
     @Column(columnDefinition = "TEXT")
-    val longDescription: String,
-    val time: Int,
-    val image: String? = null,
+    var longDescription: String,
+    var time: Int,
+    var image: String? = null,
     @Enumerated(EnumType.STRING)
-    val status: ServerComponentStatus = ServerComponentStatus.ACTIVE,
+    var status: ServerComponentStatus = ServerComponentStatus.ACTIVE,
     @Transient
     var imageUrl: String? = null
 )
