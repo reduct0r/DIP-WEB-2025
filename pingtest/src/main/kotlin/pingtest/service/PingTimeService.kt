@@ -1,6 +1,8 @@
 package com.dip.pingtest.service
 
 import com.dip.pingtest.domain.model.*
+import com.dip.pingtest.domain.model.enums.LoadLevel
+import com.dip.pingtest.domain.model.enums.PingTimeStatus
 import com.dip.pingtest.domain.repository.ComponentRepository
 import com.dip.pingtest.domain.repository.PingTimeRepository
 import com.dip.pingtest.domain.repository.UserRepository

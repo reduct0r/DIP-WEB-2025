@@ -1,4 +1,4 @@
-package com.dip.pingtest.domain.model
+package com.dip.pingtest.domain.model.enums
 
 enum class LoadLevel(val multiplier: Int) {
     LOW(1),

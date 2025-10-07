@@ -2,7 +2,7 @@ package com.dip.pingtest.service
 
 import com.dip.pingtest.config.MinioProperties
 import com.dip.pingtest.domain.model.ServerComponent
-import com.dip.pingtest.domain.model.ServerComponentStatus
+import com.dip.pingtest.domain.model.enums.ServerComponentStatus
 import com.dip.pingtest.domain.repository.ComponentRepository
 import com.dip.pingtest.infrastructure.dto.ComponentDTO
 import io.minio.GetPresignedObjectUrlArgs

@@ -1,7 +1,7 @@
 package com.dip.pingtest.controller
 
-import com.dip.pingtest.domain.model.LoadLevel
-import com.dip.pingtest.domain.model.PingTimeStatus
+import com.dip.pingtest.domain.model.enums.LoadLevel
+import com.dip.pingtest.domain.model.enums.PingTimeStatus
 import com.dip.pingtest.service.ComponentService
 import com.dip.pingtest.service.PingTimeService
 import jakarta.servlet.http.HttpServletRequest

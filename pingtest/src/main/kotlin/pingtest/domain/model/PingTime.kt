@@ -1,5 +1,7 @@
 package com.dip.pingtest.domain.model
 
+import com.dip.pingtest.domain.model.enums.LoadLevel
+import com.dip.pingtest.domain.model.enums.PingTimeStatus
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

@@ -1,5 +1,6 @@
 package com.dip.pingtest.domain.model
 
+import com.dip.pingtest.domain.model.enums.ServerComponentStatus
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
