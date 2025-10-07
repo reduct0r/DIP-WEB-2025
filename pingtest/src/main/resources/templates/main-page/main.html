@@ -40,8 +40,8 @@
 <div class="footer">Reduct0r 2025</div>
 
 <div>
-    <th:block th:if="${draftRequestId != null and requestSize > 0}">
-        <a th:href="@{/ping-time/{id}(id=${draftRequestId})}" class="request-icon">
+    <th:block th:if="${draftTimePingId != null and requestSize > 0}">
+        <a th:href="@{/ping-time/{id}(id=${draftTimePingId})}" class="request-icon">
             <img th:src="${requestIconUrl}" onerror="this.src='images/placeholder_85x89.png'">
             <span class="request-badge" th:text="${requestSize}"></span>
         </a>

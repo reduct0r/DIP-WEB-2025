@@ -20,11 +20,11 @@ class ViewController(
         //TODO hardcoded user
         val userId = 1
         val components = componentService.getComponents(filter)
-        val draftRequestId = pingTimeService.getDraftRequestIdForUser(userId)
-        val requestSize = pingTimeService.getRequestItemCountForUser(userId)
+        val draftRequestId = pingTimeService.getDraftTimePingIdForUser(userId)
+        val requestSize = pingTimeService.getTimePingItemCountForUser(userId)
         model.addAttribute("components", components)
         model.addAttribute("filter", filter ?: "")
-        model.addAttribute("draftRequestId", draftRequestId)
+        model.addAttribute("draftTimePingId", draftRequestId)
         model.addAttribute("requestSize", requestSize)
 
         model.addAttribute("iconUrl", componentService.generatePresignedUrl("icon.png"))
@@ -41,10 +41,10 @@ class ViewController(
         //TODO hardcoded user
         val userId = 1
         val component = componentService.getComponent(id)
-        val draftRequestId = pingTimeService.getDraftRequestIdForUser(userId)
-        val requestSize = pingTimeService.getRequestItemCountForUser(userId)
+        val draftRequestId = pingTimeService.getDraftTimePingIdForUser(userId)
+        val requestSize = pingTimeService.getTimePingItemCountForUser(userId)
         model.addAttribute("component", component)
-        model.addAttribute("draftRequestId", draftRequestId)
+        model.addAttribute("draftTimePingId", draftRequestId)
         model.addAttribute("requestSize", requestSize)
         model.addAttribute("pingIconUrl", componentService.generatePresignedUrl("ping_icon.svg"))
         model.addAttribute("iconUrl", componentService.generatePresignedUrl("icon.png"))
@@ -54,8 +54,8 @@ class ViewController(
     }
 
     @GetMapping("/ping-time/{id}")
-    fun viewRequest(@PathVariable id: Int, model: Model): String {
-        val pingTime = pingTimeService.getRequestDomain(id) ?: throw RuntimeException("Запрос отклик сервера не найден")
+    fun viewTimePing(@PathVariable id: Int, model: Model): String {
+        val pingTime = pingTimeService.getTimePingDomain(id) ?: throw RuntimeException("Запрос отклик сервера не найден")
         if (pingTime.status == PingTimeStatus.DELETED) {
             throw RuntimeException("Удаленный расчет отклика сервера")
         }
@@ -68,17 +68,17 @@ class ViewController(
     }
 
     @PostMapping("/ping-time/add/{componentId}")
-    fun addToRequest(@PathVariable componentId: Int, httpRequest: HttpServletRequest): String {
+    fun addToTimePing(@PathVariable componentId: Int, httpRequest: HttpServletRequest): String {
         //TODO hardcoded user
         val userId = 1
-        pingTimeService.addComponentToRequest(userId, componentId)
+        pingTimeService.addServerComponentToTimePing(userId, componentId)
         val referer = httpRequest.getHeader("Referer") ?: "/"
         return "redirect:$referer"
     }
 
     @PostMapping("/ping-time/delete/{id}")
-    fun deleteRequest(@PathVariable id: Int): String {
-        pingTimeService.logicalDeleteRequest(id)
+    fun deleteTimePing(@PathVariable id: Int): String {
+        pingTimeService.logicalDeleteTimePing(id)
         return "redirect:/"
     }
 

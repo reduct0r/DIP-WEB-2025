@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
 
 @RestController
-@RequestMapping("/api/components")
+@RequestMapping("/api/server-components")
 class ComponentController(private val service: ComponentService) {
 
     @GetMapping

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/requests")
+@RequestMapping("/api/ping-time")
 class PingTimeController(private val service: PingTimeService) {
 
     @GetMapping("/cart-icon")
@@ -28,33 +28,33 @@ class PingTimeController(private val service: PingTimeService) {
         @RequestParam(required = false) status: String?,
         @RequestParam(required = false) fromDate: String?,
         @RequestParam(required = false) toDate: String?
-    ): List<PingTimeDTO> = service.getRequests(status, fromDate, toDate)
+    ): List<PingTimeDTO> = service.getTimePings(status, fromDate, toDate)
 
     @GetMapping("/{id}")
-    fun getOne(@PathVariable id: Int): PingTimeDTO = service.getRequest(id)
+    fun getOne(@PathVariable id: Int): PingTimeDTO = service.getTimePing(id)
 
     @PutMapping("/{id}/form")
-    fun form(@PathVariable id: Int): PingTimeDTO = service.formRequest(id)
+    fun form(@PathVariable id: Int): PingTimeDTO = service.formTimePing(id)
 
     @PutMapping("/{id}/complete")
-    fun complete(@PathVariable id: Int): PingTimeDTO = service.completeRequest(id)
+    fun complete(@PathVariable id: Int): PingTimeDTO = service.completeTimePing(id)
 
     @PutMapping("/{id}/reject")
-    fun reject(@PathVariable id: Int): PingTimeDTO = service.rejectRequest(id)
+    fun reject(@PathVariable id: Int): PingTimeDTO = service.rejectTimePing(id)
 
     @PutMapping("/{id}")
-    fun updateRequest(@PathVariable id: Int, @RequestBody dto: PingTimeUpdateDTO): PingTimeDTO {
-        return service.updateRequest(id, dto)
+    fun updateTimePing(@PathVariable id: Int, @RequestBody dto: PingTimeUpdateDTO): PingTimeDTO {
+        return service.updateTimePing(id, dto)
     }
 
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: Int): ResponseEntity<Void> {
-        service.deleteRequest(id)
+        service.deleteTimePing(id)
         return ResponseEntity.noContent().build()
     }
 
     @PostMapping("/draft/add/{componentId}")
-    fun addToDraft(@PathVariable componentId: Int): PingTimeDTO = service.addComponentToDraft(componentId)
+    fun addToDraft(@PathVariable componentId: Int): PingTimeDTO = service.addServerComponentToDraft(componentId)
 
     @PutMapping("/{requestId}/items/{componentId}")
     fun updateItem(@PathVariable requestId: Int, @PathVariable componentId: Int, @RequestBody dto: ItemUpdateDTO): PingTimeDTO =

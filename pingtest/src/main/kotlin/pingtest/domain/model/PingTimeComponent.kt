@@ -27,7 +27,7 @@ data class PingTimeComponent(
     val component: ServerComponent,
     var quantity: Int = 1,
     @Column(name = "order_number")
-    var orderNumber: Int = 0,
+    var priority: Int = 0,
     var componentGroup: String? = null,
     var subtotalTime: Int = 0
 )

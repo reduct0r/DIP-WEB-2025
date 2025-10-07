@@ -23,7 +23,7 @@ class PingTimeService(
 ) {
     companion object {
         const val FIXED_CREATOR_ID = 1
-        const val FIXED_MODERATOR_ID = 1 // For now, same
+        const val FIXED_MODERATOR_ID = 1
     }
 
     fun getCartIcon(): CartIconDTO {
@@ -31,52 +31,52 @@ class PingTimeService(
         return CartIconDTO(draft?.id, draft?.items?.size ?: 0)
     }
 
-    fun getRequests(status: String?, fromDate: String?, toDate: String?): List<PingTimeDTO> {
+    fun getTimePings(status: String?, fromDate: String?, toDate: String?): List<PingTimeDTO> {
         val excludedStatuses = listOf(PingTimeStatus.DELETED, PingTimeStatus.DRAFT)
         val from = fromDate?.let { LocalDateTime.parse(it) }
         val to = toDate?.let { LocalDateTime.parse(it) }
-        var requests = pingTimeRepository.findAllByStatusNotInAndFormationDateBetween(excludedStatuses, from, to)
+        var pingTimes = pingTimeRepository.findAllByStatusNotInAndFormationDateBetween(excludedStatuses, from, to)
         status?.let { s ->
             val enumStatus = PingTimeStatus.valueOf(s.uppercase())
-            requests = requests.filter { it.status == enumStatus }
+            pingTimes = pingTimes.filter { it.status == enumStatus }
         }
-        return requests.map { toDTO(it) }
+        return pingTimes.map { toDTO(it) }
     }
 
-    fun getRequest(id: Int): PingTimeDTO {
-        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Request not found") }
-        if (request.status == PingTimeStatus.DELETED) throw RuntimeException("Request deleted")
-        return toDTO(request)
+    fun getTimePing(id: Int): PingTimeDTO {
+        val pingTime = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
+        if (pingTime.status == PingTimeStatus.DELETED) throw RuntimeException("Ping Time Request deleted")
+        return toDTO(pingTime)
     }
 
-    fun getRequestDomain(id: Int): PingTime? {
+    fun getTimePingDomain(id: Int): PingTime? {
         val pingTime = pingTimeRepository.findById(id).orElse(null)
         pingTime?.items?.forEach { it.component.imageUrl = componentService.generatePresignedUrl(it.component.image) }
         return pingTime
     }
 
-    fun getDraftRequestIdForUser(userId: Int): Int? {
+    fun getDraftTimePingIdForUser(userId: Int): Int? {
         return pingTimeRepository.findByCreatorIdAndStatus(userId, PingTimeStatus.DRAFT)?.id
     }
 
-    fun getRequestItemCountForUser(userId: Int): Int {
+    fun getTimePingItemCountForUser(userId: Int): Int {
         return pingTimeRepository.findByCreatorIdAndStatus(userId, PingTimeStatus.DRAFT)?.items?.size ?: 0
     }
 
-    fun formRequest(id: Int): PingTimeDTO {
-        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Request not found") }
+    fun formTimePing(id: Int): PingTimeDTO {
+        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (request.status != PingTimeStatus.DRAFT || request.creator.id != FIXED_CREATOR_ID) {
             throw RuntimeException("Only creator can form draft")
         }
-        if (request.items.isEmpty()) throw RuntimeException("Cannot form empty request")
+        if (request.items.isEmpty()) throw RuntimeException("Cannot form empty Ping Time requests")
         request.status = PingTimeStatus.FORMED
         request.formationDate = LocalDateTime.now()
         val saved = pingTimeRepository.save(request)
         return toDTO(saved)
     }
 
-    fun completeRequest(id: Int): PingTimeDTO {
-        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Request not found") }
+    fun completeTimePing(id: Int): PingTimeDTO {
+        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (request.status != PingTimeStatus.FORMED) throw RuntimeException("Only formed can be completed")
         // Moderator check skip
         request.totalTime = calculateTotalTime(request)
@@ -87,8 +87,8 @@ class PingTimeService(
         return toDTO(saved)
     }
 
-    fun rejectRequest(id: Int): PingTimeDTO {
-        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Request not found") }
+    fun rejectTimePing(id: Int): PingTimeDTO {
+        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (request.status != PingTimeStatus.FORMED) throw RuntimeException("Only formed can be rejected")
         request.status = PingTimeStatus.REJECTED
         request.completionDate = LocalDateTime.now()
@@ -97,8 +97,8 @@ class PingTimeService(
         return toDTO(saved)
     }
 
-    fun deleteRequest(id: Int) {
-        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Request not found") }
+    fun deleteTimePing(id: Int) {
+        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (request.creator.id != FIXED_CREATOR_ID || (request.status != PingTimeStatus.DRAFT && request.status != PingTimeStatus.FORMED)) {
             throw RuntimeException("Only creator can delete draft or formed")
         }
@@ -106,17 +106,17 @@ class PingTimeService(
         pingTimeRepository.save(request)
     }
 
-    fun logicalDeleteRequest(id: Int) {
-        deleteRequest(id)
+    fun logicalDeleteTimePing(id: Int) {
+        deleteTimePing(id)
     }
 
-    fun addComponentToDraft(componentId: Int): PingTimeDTO {
-        val pingTime = addComponentToRequest(FIXED_CREATOR_ID, componentId)
+    fun addServerComponentToDraft(componentId: Int): PingTimeDTO {
+        val pingTime = addServerComponentToTimePing(FIXED_CREATOR_ID, componentId)
         return toDTO(pingTime)
     }
 
-    fun addComponentToRequest(userId: Int, componentId: Int): PingTime {
-        val component = componentRepository.findById(componentId).orElseThrow { RuntimeException("Component not found") }
+    fun addServerComponentToTimePing(userId: Int, componentId: Int): PingTime {
+        val component = componentRepository.findById(componentId).orElseThrow { RuntimeException("Server Component not found") }
         var request = pingTimeRepository.findByCreatorIdAndStatus(userId, PingTimeStatus.DRAFT)
         val creator = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
 
@@ -130,7 +130,7 @@ class PingTimeService(
             existingItem.quantity += 1
             existingItem.subtotalTime = calculateSubtotal(existingItem.component, existingItem.quantity, existingItem.componentGroup)
         } else {
-            val order = request.items.size + 1
+            val pingTime = request.items.size + 1
             val subtotal = calculateSubtotal(component, 1, null)
             val item = PingTimeComponent(
                 pingTimeId = request.id,
@@ -138,7 +138,7 @@ class PingTimeService(
                 pingTime = request,
                 component = component,
                 quantity = 1,
-                orderNumber = order,
+                priority = pingTime,
                 componentGroup = null,
                 subtotalTime = subtotal
             )
@@ -149,11 +149,11 @@ class PingTimeService(
     }
 
     fun updateItem(requestId: Int, componentId: Int, dto: ItemUpdateDTO): PingTimeDTO {
-        val request = pingTimeRepository.findById(requestId).orElseThrow { RuntimeException("Request not found") }
+        val request = pingTimeRepository.findById(requestId).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (request.status != PingTimeStatus.DRAFT) throw RuntimeException("Can only update draft items")
         val item = request.items.find { it.component.id == componentId } ?: throw RuntimeException("Item not found")
         dto.quantity?.let { item.quantity = it }
-        dto.orderNumber?.let { item.orderNumber = it }
+        dto.priority?.let { item.priority = it }
         dto.componentGroup?.let { item.componentGroup = it }
         item.subtotalTime = calculateSubtotal(item.component, item.quantity, item.componentGroup)
         request.totalTime = calculateTotalTime(request)
@@ -162,10 +162,10 @@ class PingTimeService(
     }
 
     fun deleteItem(requestId: Int, componentId: Int): PingTimeDTO {
-        val request = pingTimeRepository.findById(requestId).orElseThrow { RuntimeException("Request not found") }
+        val request = pingTimeRepository.findById(requestId).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (request.status != PingTimeStatus.DRAFT) throw RuntimeException("Can only delete from draft")
         request.items.removeIf { it.component.id == componentId }
-        request.items.forEachIndexed { index, item -> item.orderNumber = index + 1 }
+        request.items.forEachIndexed { index, item -> item.priority = index + 1 }
         request.totalTime = calculateTotalTime(request)
         val saved = pingTimeRepository.save(request)
         return toDTO(saved)
@@ -181,8 +181,8 @@ class PingTimeService(
     }
 
     private fun calculateTotalTime(request: PingTime): Int {
-        val sortedItems = request.items.sortedBy { it.orderNumber }
-        val grouped = sortedItems.groupBy { it.orderNumber }
+        val sortedItems = request.items.sortedBy { it.priority }
+        val grouped = sortedItems.groupBy { it.priority }
         var total = 0
         grouped.keys.sorted().forEach { key ->
             val groupSum = grouped[key]!!.sumOf { it.subtotalTime }
@@ -191,8 +191,8 @@ class PingTimeService(
         return total
     }
 
-    fun updateRequest(id: Int, dto: PingTimeUpdateDTO): PingTimeDTO {
-        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Request not found") }
+    fun updateTimePing(id: Int, dto: PingTimeUpdateDTO): PingTimeDTO {
+        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (request.status != PingTimeStatus.DRAFT) throw RuntimeException("Can only update draft requests")
 
         dto.totalTime?.let { request.totalTime = it }
@@ -221,7 +221,7 @@ class PingTimeService(
                 time = it.component.time,
                 imageUrl = componentService.generatePresignedUrl(it.component.image),
                 quantity = it.quantity,
-                orderNumber = it.orderNumber,
+                priority = it.priority,
                 componentGroup = it.componentGroup,
                 subtotalTime = it.subtotalTime
             )
