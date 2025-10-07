@@ -8,6 +8,7 @@ import com.dip.pingtest.infrastructure.dto.CartIconDTO
 import com.dip.pingtest.infrastructure.dto.ItemUpdateDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeItemDTO
+import com.dip.pingtest.infrastructure.dto.PingTimeUpdateDTO
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -188,6 +189,19 @@ class PingTimeService(
             total += groupSum
         }
         return total
+    }
+
+    fun updateRequest(id: Int, dto: PingTimeUpdateDTO): PingTimeDTO {
+        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Request not found") }
+        if (request.status != PingTimeStatus.DRAFT) throw RuntimeException("Can only update draft requests")
+
+        dto.totalTime?.let { request.totalTime = it }
+
+        // Или альтернативно: всегда пересчитываем, игнорируя dto.totalTime
+        // request.totalTime = calculateTotalTime(request)
+
+        val saved = pingTimeRepository.save(request)
+        return toDTO(saved)
     }
 
     private fun toDTO(request: PingTime): PingTimeDTO = PingTimeDTO(

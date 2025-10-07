@@ -3,6 +3,7 @@ package com.dip.pingtest.controller
 import com.dip.pingtest.infrastructure.dto.CartIconDTO
 import com.dip.pingtest.infrastructure.dto.ItemUpdateDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeDTO
+import com.dip.pingtest.infrastructure.dto.PingTimeUpdateDTO
 import com.dip.pingtest.service.PingTimeService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -40,6 +41,11 @@ class PingTimeController(private val service: PingTimeService) {
 
     @PutMapping("/{id}/reject")
     fun reject(@PathVariable id: Int): PingTimeDTO = service.rejectRequest(id)
+
+    @PutMapping("/{id}")
+    fun updateRequest(@PathVariable id: Int, @RequestBody dto: PingTimeUpdateDTO): PingTimeDTO {
+        return service.updateRequest(id, dto)
+    }
 
     @DeleteMapping("/{id}")
     fun delete(@PathVariable id: Int): ResponseEntity<Void> {
