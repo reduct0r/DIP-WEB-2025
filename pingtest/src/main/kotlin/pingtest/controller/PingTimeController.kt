@@ -1,6 +1,6 @@
 package com.dip.pingtest.controller
 
-import com.dip.pingtest.infrastructure.dto.CartIconDTO
+import com.dip.pingtest.infrastructure.dto.TimePingIconDTO
 import com.dip.pingtest.infrastructure.dto.ItemUpdateDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeUpdateDTO
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 class PingTimeController(private val service: PingTimeService) {
 
     @GetMapping("/cart-icon")
-    fun getCartIcon(): CartIconDTO = service.getCartIcon()
+    fun getTimePingIcon(): TimePingIconDTO = service.getTimePingIcon()
 
     @GetMapping
     fun getAll(

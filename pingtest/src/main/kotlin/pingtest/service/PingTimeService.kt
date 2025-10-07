@@ -4,7 +4,7 @@ import com.dip.pingtest.domain.model.*
 import com.dip.pingtest.domain.repository.ComponentRepository
 import com.dip.pingtest.domain.repository.PingTimeRepository
 import com.dip.pingtest.domain.repository.UserRepository
-import com.dip.pingtest.infrastructure.dto.CartIconDTO
+import com.dip.pingtest.infrastructure.dto.TimePingIconDTO
 import com.dip.pingtest.infrastructure.dto.ItemUpdateDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeItemDTO
@@ -26,9 +26,9 @@ class PingTimeService(
         const val FIXED_MODERATOR_ID = 1
     }
 
-    fun getCartIcon(): CartIconDTO {
+    fun getTimePingIcon(): TimePingIconDTO {
         val draft = pingTimeRepository.findByCreatorIdAndStatus(FIXED_CREATOR_ID, PingTimeStatus.DRAFT)
-        return CartIconDTO(draft?.id, draft?.items?.size ?: 0)
+        return TimePingIconDTO(draft?.id, draft?.items?.size ?: 0)
     }
 
     fun getTimePings(status: String?, fromDate: String?, toDate: String?): List<PingTimeDTO> {
