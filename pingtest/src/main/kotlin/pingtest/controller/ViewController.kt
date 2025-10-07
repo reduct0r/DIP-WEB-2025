@@ -36,8 +36,8 @@ class ViewController(
         return "main-page/main"
     }
 
-    @GetMapping("/component/{id}")
-    fun viewService(@PathVariable id: Int, model: Model): String {
+    @GetMapping("/server-component/{id}")
+    fun viewServerComponent(@PathVariable id: Int, model: Model): String {
         //TODO hardcoded user
         val userId = 1
         val component = componentService.getComponent(id)

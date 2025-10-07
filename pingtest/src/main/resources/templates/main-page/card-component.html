@@ -5,7 +5,7 @@
 </head>
 <body>
 <div th:fragment="card-component(component)" class="card-container">
-    <a th:href="@{/component/{id}(id=${component.id})}" class="card-link">
+    <a th:href="@{/server-component/{id}(id=${component.id})}" class="card-link">
         <div class="card-content-container">
             <img alt="placeholder" th:src="${component.imageUrl}" onerror="this.src='/images/placeholder_142x142.png'"/>
             <p class="card-title" th:text="${component.title}">Название компонента</p>

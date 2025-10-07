@@ -19,7 +19,7 @@
     <div class="mm-fields">
         <div class="priority">
             Приоритет
-            <input type="number" th:value="${item.orderNumber}" class="mini-input"> <!-- order как priority -->
+            <input type="number" th:value="${item.priority}" class="mini-input"> <!-- order как priority -->
         </div>
         <!-- Выпадающий список -->
         <select class="dark-select" th:value="${item.componentGroup ?: 'Нет'}">
