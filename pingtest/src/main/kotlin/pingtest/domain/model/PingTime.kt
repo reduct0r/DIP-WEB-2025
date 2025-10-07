@@ -1,6 +1,7 @@
 package com.dip.pingtest.domain.model
 
 import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -31,6 +32,10 @@ data class PingTime(
     var moderator: User? = null,
 
     var totalTime: Int = 0,
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "load_level")
+    var loadLevel: LoadLevel = LoadLevel.LOW
 ) {
     @OneToMany(mappedBy = "pingTime", cascade = [CascadeType.PERSIST, CascadeType.MERGE])
     val items: MutableList<PingTimeComponent> = mutableListOf()

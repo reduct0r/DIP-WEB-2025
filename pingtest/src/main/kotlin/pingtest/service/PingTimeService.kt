@@ -192,16 +192,21 @@ class PingTimeService(
     }
 
     fun updateTimePing(id: Int, dto: PingTimeUpdateDTO): PingTimeDTO {
-        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
-        if (request.status != PingTimeStatus.DRAFT) throw RuntimeException("Can only update draft requests")
+        val pingTime = pingTimeRepository.findById(id).orElseThrow { RuntimeException("PingTime not found") }
 
-        dto.totalTime?.let { request.totalTime = it }
+        dto.loadLevel?.let {
+            pingTime.loadLevel = LoadLevel.valueOf(it.uppercase())
+        }
 
-        // Или альтернативно: всегда пересчитываем, игнорируя dto.totalTime
-        // request.totalTime = calculateTotalTime(request)
+        recalculateTotal(pingTime)
+        pingTimeRepository.save(pingTime)
 
-        val saved = pingTimeRepository.save(request)
-        return toDTO(saved)
+        return toDTO(pingTime)
+    }
+
+    private fun recalculateTotal(pingTime: PingTime) {
+        val baseSum = pingTime.items.sumOf { it.subtotalTime }
+        pingTime.totalTime = baseSum * pingTime.loadLevel.multiplier
     }
 
     private fun toDTO(request: PingTime): PingTimeDTO = PingTimeDTO(
@@ -225,6 +230,7 @@ class PingTimeService(
                 componentGroup = it.componentGroup,
                 subtotalTime = it.subtotalTime
             )
-        }
+        },
+        loadLevel = request.loadLevel.name
     )
 }

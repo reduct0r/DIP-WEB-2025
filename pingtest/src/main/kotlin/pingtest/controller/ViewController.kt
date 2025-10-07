@@ -1,5 +1,6 @@
 package com.dip.pingtest.controller
 
+import com.dip.pingtest.domain.model.LoadLevel
 import com.dip.pingtest.domain.model.PingTimeStatus
 import com.dip.pingtest.service.ComponentService
 import com.dip.pingtest.service.PingTimeService
@@ -59,10 +60,19 @@ class ViewController(
         if (pingTime.status == PingTimeStatus.DELETED) {
             throw RuntimeException("Удаленный расчет отклика сервера")
         }
+
+        val selectedLoadLevel = pingTime.loadLevel
+
+        val previewTotalTime = pingTime.items.sumOf { it.subtotalTime } * selectedLoadLevel.multiplier
+
         model.addAttribute("ping_time", pingTime)
+        model.addAttribute("previewTotalTime", previewTotalTime)
+        model.addAttribute("selectedLoadLevel", selectedLoadLevel)
         model.addAttribute("iconUrl", componentService.generatePresignedUrl("icon.png"))
         model.addAttribute("pingIconUrl", componentService.generatePresignedUrl("ping_icon.svg"))
         model.addAttribute("deleteIconUrl", componentService.generatePresignedUrl("delete_icon.svg"))
+
+        model.addAttribute("loadLevels", LoadLevel.entries.toTypedArray())
 
         return "ping-time-page/ping-time"
     }

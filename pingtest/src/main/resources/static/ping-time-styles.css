@@ -143,6 +143,36 @@ body, html {
     border-radius: 5px;
     padding: 5px;
     font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.dark-select:hover {
+    border-color: #881af0;
+}
+
+.dark-select option {
+    background-color: #05061F;
+    color: #ffffff;
+}
+
+.dark-select option[value="LOW"] {
+    background-color: #228B22; /* Зеленый для LOW */
+    color: #ffffff;
+}
+
+.dark-select option[value="MEDIUM"] {
+    background-color: #FFD700; /* Желтый для MEDIUM */
+    color: #000000;
+}
+
+.dark-select option[value="HIGH"] {
+    background-color: #FF4500; /* Оранжевый для HIGH */
+    color: #ffffff;
+}
+
+.dark-select option[value="EXTREME"] {
+    background-color: #8B0000; /* Красный для EXTREME */
+    color: #ffffff;
 }
 
 .quantity {
@@ -343,4 +373,27 @@ body, html {
 .button-content-container img {
     width: 25px;
     height: 25px;
+}
+
+.load-level-selector {
+    background-color: #1A1B2E;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    margin-left: 20px;
+    margin-bottom: 10px;
+    width: max-content;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    border: 1px solid #121324;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.load-level-selector label {
+    margin: 0;
+    font-weight: normal;
+    white-space: nowrap;
 }

@@ -23,10 +23,17 @@
             <p>Дата создания: <span th:text="${#temporals.format(ping_time.createdAt, 'dd.MM.yyyy HH:mm:ss')}"></span></p>
         </div>
 
+        <div class="load-level-selector">
+            <label for="loadLevel">Уровень нагрузки:</label>
+            <select id="loadLevel" class="dark-select">
+                <option th:each="level : ${loadLevels}" th:value="${level.name}" th:text="${level.name}" th:selected="${level.name == 'LOW'}"></option>
+            </select>
+        </div>
+
         <div class="container-plate">
             <div class="components-stack">
                 <div class="calculations-container">
-                    <p class="result-title">Итоговое время: <span th:text="${ping_time.totalTime} + ' мс'"></span></p>  <!-- Результат вычислений -->
+                    <p class="result-title">Итоговое время: <span th:text="${previewTotalTime} + ' мс'"></span></p>
                 </div>
                 <div th:each="item : ${ping_time.items}">
                     <div th:replace="~{ping-time-page/ping-time-component :: ping-time-component(${item})}"></div>
