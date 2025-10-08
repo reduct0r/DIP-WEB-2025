@@ -24,5 +24,5 @@ data class ServerComponent(
     @Enumerated(EnumType.STRING)
     var status: ServerComponentStatus = ServerComponentStatus.ACTIVE,
     @Transient
-    var imageUrl: String? = null
+    var imageUrl: String? = null,
 )

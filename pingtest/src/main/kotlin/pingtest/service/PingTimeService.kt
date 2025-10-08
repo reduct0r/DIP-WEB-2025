@@ -139,7 +139,8 @@ class PingTimeService(
                 quantity = 1,
                 priority = priority,
                 componentGroup = null,
-                subtotalTime = subtotal
+                subtotalTime = subtotal,
+                serverComponentTime = component.time
             )
             request.items.add(item)
         }
@@ -154,6 +155,7 @@ class PingTimeService(
         dto.quantity?.let { item.quantity = it }
         dto.priority?.let { item.priority = it }
         dto.componentGroup?.let { item.componentGroup = it }
+        dto.serverComponentTime?.let { item.serverComponentTime = it }
         item.subtotalTime = calculateSubtotal(item.component, item.quantity, item.componentGroup)
         recalculateTotal(request)
         val saved = pingTimeRepository.save(request)
@@ -227,7 +229,8 @@ class PingTimeService(
                 quantity = it.quantity,
                 priority = it.priority,
                 componentGroup = it.componentGroup,
-                subtotalTime = it.subtotalTime
+                subtotalTime = it.subtotalTime,
+                serverComponentTime = it.serverComponentTime
             )
         },
         loadLevel = request.loadLevel.name

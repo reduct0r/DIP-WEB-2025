@@ -29,5 +29,6 @@ data class PingTimeComponent(
     @Column(name = "priority")
     var priority: Int = 0,
     var componentGroup: String? = null,
-    var subtotalTime: Int = 0
+    var subtotalTime: Int = 0,
+    var serverComponentTime: Int
 )
