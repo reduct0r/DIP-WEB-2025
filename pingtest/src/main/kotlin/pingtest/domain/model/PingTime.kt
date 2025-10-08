@@ -39,6 +39,6 @@ data class PingTime(
     @Column(name = "load_level")
     var loadLevel: LoadLevel = LoadLevel.LOW
 ) {
-    @OneToMany(mappedBy = "pingTime", cascade = [CascadeType.PERSIST, CascadeType.MERGE])
+    @OneToMany(mappedBy = "pingTime", cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE], orphanRemoval = true)
     val items: MutableList<PingTimeComponent> = mutableListOf()
 }

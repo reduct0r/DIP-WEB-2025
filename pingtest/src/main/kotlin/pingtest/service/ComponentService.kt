@@ -50,7 +50,7 @@ class ComponentService(
 
     fun getComponent(id: Int): ComponentDTO {
         val component = componentRepository.findById(id).orElseThrow { RuntimeException("Component not found") }
-        if (component.status != ServerComponentStatus.ACTIVE) throw RuntimeException("Component deleted")
+        if (component.status != ServerComponentStatus.ACTIVE) throw RuntimeException("Серверный компонент удален")
         return toDTO(component)
     }
 
