@@ -77,24 +77,21 @@ class PingTimeService(
         return toDTO(saved)
     }
 
-    fun completeTimePing(id: Int): PingTimeDTO {
+    fun moderateTimePing(id: Int, action: String): PingTimeDTO {
         val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
-        if (request.status != PingTimeStatus.FORMED) throw RuntimeException("Only formed can be completed")
-        // Moderator check skip
-        request.totalTime = calculateTotalTime(request)
-        request.status = PingTimeStatus.COMPLETED
+        if (request.status != PingTimeStatus.FORMED) throw RuntimeException("Only formed can be moderated")
         request.completionDate = LocalDateTime.now()
         request.moderator = userRepository.findById(FIXED_MODERATOR_ID).orElseThrow()
-        val saved = pingTimeRepository.save(request)
-        return toDTO(saved)
-    }
-
-    fun rejectTimePing(id: Int): PingTimeDTO {
-        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
-        if (request.status != PingTimeStatus.FORMED) throw RuntimeException("Only formed can be rejected")
-        request.status = PingTimeStatus.REJECTED
-        request.completionDate = LocalDateTime.now()
-        request.moderator = userRepository.findById(FIXED_MODERATOR_ID).orElseThrow()
+        when (action.uppercase()) {
+            "COMPLETE" -> {
+                recalculateTotal(request)
+                request.status = PingTimeStatus.COMPLETED
+            }
+            "REJECT" -> {
+                request.status = PingTimeStatus.REJECTED
+            }
+            else -> throw RuntimeException("Invalid action: $action")
+        }
         val saved = pingTimeRepository.save(request)
         return toDTO(saved)
     }
@@ -132,7 +129,7 @@ class PingTimeService(
             existingItem.quantity += 1
             existingItem.subtotalTime = calculateSubtotal(existingItem.component, existingItem.quantity, existingItem.componentGroup)
         } else {
-            val pingTime = request.items.size + 1
+            val priority = request.items.size + 1
             val subtotal = calculateSubtotal(component, 1, null)
             val item = PingTimeComponent(
                 pingTimeId = request.id,
@@ -140,13 +137,13 @@ class PingTimeService(
                 pingTime = request,
                 component = component,
                 quantity = 1,
-                priority = pingTime,
+                priority = priority,
                 componentGroup = null,
                 subtotalTime = subtotal
             )
             request.items.add(item)
         }
-        request.totalTime = calculateTotalTime(request)
+        recalculateTotal(request)
         return pingTimeRepository.save(request)
     }
 
@@ -158,7 +155,7 @@ class PingTimeService(
         dto.priority?.let { item.priority = it }
         dto.componentGroup?.let { item.componentGroup = it }
         item.subtotalTime = calculateSubtotal(item.component, item.quantity, item.componentGroup)
-        request.totalTime = calculateTotalTime(request)
+        recalculateTotal(request)
         val saved = pingTimeRepository.save(request)
         return toDTO(saved)
     }
@@ -168,7 +165,7 @@ class PingTimeService(
         if (request.status != PingTimeStatus.DRAFT) throw RuntimeException("Can only delete from draft")
         request.items.removeIf { it.component.id == componentId }
         request.items.forEachIndexed { index, item -> item.priority = index + 1 }
-        request.totalTime = calculateTotalTime(request)
+        recalculateTotal(request)
         val saved = pingTimeRepository.save(request)
         return toDTO(saved)
     }
@@ -182,15 +179,15 @@ class PingTimeService(
         return subtotal
     }
 
-    private fun calculateTotalTime(request: PingTime): Int {
+    private fun calculateBaseTime(request: PingTime): Int {
         val sortedItems = request.items.sortedBy { it.priority }
         val grouped = sortedItems.groupBy { it.priority }
-        var total = 0
+        var base = 0
         grouped.keys.sorted().forEach { key ->
             val groupSum = grouped[key]!!.sumOf { it.subtotalTime }
-            total += groupSum
+            base += groupSum
         }
-        return total
+        return base
     }
 
     fun updateTimePing(id: Int, dto: PingTimeUpdateDTO): PingTimeDTO {
@@ -207,8 +204,8 @@ class PingTimeService(
     }
 
     private fun recalculateTotal(pingTime: PingTime) {
-        val baseSum = pingTime.items.sumOf { it.subtotalTime }
-        pingTime.totalTime = baseSum * pingTime.loadLevel.multiplier
+        val baseTime = calculateBaseTime(pingTime)
+        pingTime.totalTime = baseTime * pingTime.loadLevel.multiplier
     }
 
     private fun toDTO(request: PingTime): PingTimeDTO = PingTimeDTO(

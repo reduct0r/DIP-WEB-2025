@@ -1,7 +1,9 @@
 package com.dip.pingtest.controller
 
 import com.dip.pingtest.infrastructure.dto.ComponentDTO
+import com.dip.pingtest.infrastructure.dto.PingTimeDTO
 import com.dip.pingtest.service.ComponentService
+import com.dip.pingtest.service.PingTimeService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/server-components")
-class ComponentController(private val service: ComponentService) {
+class ComponentController(private val service: ComponentService, private val pingTimeService: PingTimeService) {
 
     @GetMapping
     fun getAll(@RequestParam(required = false) filter: String?): List<ComponentDTO> = service.getComponents(filter)
@@ -38,4 +40,7 @@ class ComponentController(private val service: ComponentService) {
 
     @PostMapping("/{id}/image")
     fun uploadImage(@PathVariable id: Int, @RequestParam("file") file: MultipartFile): String = service.uploadImage(id, file)
+
+    @PostMapping("/{componentId}/add-to-draft")
+    fun addToDraft(@PathVariable componentId: Int): PingTimeDTO = pingTimeService.addServerComponentToDraft(componentId)
 }

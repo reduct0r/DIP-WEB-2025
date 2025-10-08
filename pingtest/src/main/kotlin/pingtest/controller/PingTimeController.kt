@@ -2,6 +2,7 @@ package com.dip.pingtest.controller
 
 import com.dip.pingtest.infrastructure.dto.TimePingIconDTO
 import com.dip.pingtest.infrastructure.dto.ItemUpdateDTO
+import com.dip.pingtest.infrastructure.dto.ModerateActionDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeUpdateDTO
 import com.dip.pingtest.service.PingTimeService
@@ -36,11 +37,8 @@ class PingTimeController(private val service: PingTimeService) {
     @PutMapping("/{id}/form")
     fun form(@PathVariable id: Int): PingTimeDTO = service.formTimePing(id)
 
-    @PutMapping("/{id}/complete")
-    fun complete(@PathVariable id: Int): PingTimeDTO = service.completeTimePing(id)
-
-    @PutMapping("/{id}/reject")
-    fun reject(@PathVariable id: Int): PingTimeDTO = service.rejectTimePing(id)
+    @PutMapping("/{id}/moderate")
+    fun moderate(@PathVariable id: Int, @RequestBody dto: ModerateActionDTO): PingTimeDTO = service.moderateTimePing(id, dto.action)
 
     @PutMapping("/{id}")
     fun updateTimePing(@PathVariable id: Int, @RequestBody dto: PingTimeUpdateDTO): PingTimeDTO {
@@ -53,9 +51,7 @@ class PingTimeController(private val service: PingTimeService) {
         return ResponseEntity.noContent().build()
     }
 
-    @PostMapping("/draft/add/{componentId}")
-    fun addToDraft(@PathVariable componentId: Int): PingTimeDTO = service.addServerComponentToDraft(componentId)
-
+    // M-M
     @PutMapping("/{requestId}/items/{componentId}")
     fun updateItem(@PathVariable requestId: Int, @PathVariable componentId: Int, @RequestBody dto: ItemUpdateDTO): PingTimeDTO =
         service.updateItem(requestId, componentId, dto)
