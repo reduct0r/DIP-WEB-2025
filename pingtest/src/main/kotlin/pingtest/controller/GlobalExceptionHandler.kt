@@ -1,11 +1,13 @@
 package com.dip.pingtest.controller
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import java.time.LocalDateTime
 
+@Tag(name = "Error Handling", description = "Global exception handlers for API errors")
 @RestControllerAdvice
 class GlobalExceptionHandler {
 

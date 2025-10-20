@@ -38,13 +38,21 @@ class SecurityConfig(private val jwtService: JwtService, private val blacklistSe
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
+            .headers { it.frameOptions { it.disable() } }  // Disable frame options for Swagger UI
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
-                it.requestMatchers("/api/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                // Изменённая строка для GET
+                it.requestMatchers(
+                    "/api/auth/**",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/swagger-ui/index.html",
+                    "/v3/api-docs/**",
+                    "/webjars/**"
+                ).permitAll()
                 it.requestMatchers(AntPathRequestMatcher("/api/server-components/**", "GET")).permitAll()
                 it.requestMatchers("/api/server-components/**").hasAnyRole("USER", "MODERATOR")
                 it.requestMatchers("/api/ping-time/moderate/**").hasRole("MODERATOR")
+                it.requestMatchers("/api/users/register").permitAll()
                 it.requestMatchers("/**").authenticated()
             }
             .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter::class.java)
