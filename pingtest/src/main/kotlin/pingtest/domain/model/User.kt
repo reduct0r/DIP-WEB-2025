@@ -1,5 +1,6 @@
 package com.dip.pingtest.domain.model
 
+import com.dip.pingtest.domain.model.enums.Role
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -13,6 +14,6 @@ data class User(
     val id: Int = 0,
     var username: String,
     var password: String,
-    val isModerator: Boolean = false,
+    var role: Role = Role.USER,
     var preferences: String? = null
 )
