@@ -100,6 +100,17 @@ services:
       ADMINER_DEFAULT_SERVER: postgres_lab
       ADMINER_DESIGN: galkaev
 
+  # Добавление сервиса Redis
+  redis:
+    image: redis:8-alpine
+    container_name: redis_lab
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass yourpassword
+    volumes:
+      - redis_data:/data
+
 ## По умолчанию в этой конфигурации используется локальный драйвер docker по умолчанию,
 ## Для пользовательских томов замените на конфигурацию драйвера тома.
 volumes:
@@ -112,3 +123,4 @@ volumes:
   data4-1:
   data4-2:
   postgres_data:  # volume для PostgreSQL данных
+  redis_data:  # volume для Redis данных
