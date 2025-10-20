@@ -122,53 +122,79 @@
 
 .add-to-cart {
     display: flex;
-    flex-direction: column;
+    justify-content: center;
     align-items: center;
     color: #ffffff;
     margin-top: 20px;
     font-size: 18px;
-    gap: 10px;
+    gap: 20px;
+    padding: 20px;
+    background-color: #05061F;
+    border-radius: 10px;
+    border: 1px solid #121324;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.add-to-cart form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
 }
 
 .add-to-cart label {
-    font-weight: normal;
+    font-weight: bold;
+    font-size: 20px;
     white-space: nowrap;
 }
 
 .checkbox-group {
     display: flex;
     flex-direction: row;
-    gap: 20px;
+    gap: 30px;
 }
 
 .checkbox-label {
     display: flex;
     align-items: center;
-    gap: 5px;
-    font-size: 16px;
+    gap: 8px;
+    font-size: 18px;
     color: #ffffff;
     white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.checkbox-label:hover {
+    color: #1CBFFF;
 }
 
 .checkbox-label input[type="checkbox"] {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     accent-color: #1CBFFF;
     cursor: pointer;
+    border-radius: 4px;
 }
 
 .add-to-cart button {
-    background-color: #05061F;
+    background-color: #1A1B2E;
     color: #ffffff;
-    border: 1px solid #1CBFFF;
-    padding: 5px 10px;
-    border-radius: 5px;
+    border: 2px solid #1CBFFF;
+    padding: 10px 30px;
+    border-radius: 30px;
     cursor: pointer;
-    transition: border-color 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
     font-family: 'Roboto Mono', monospace;
-    font-size: 16px;
+    font-size: 18px;
+    font-weight: bold;
 }
 
 .add-to-cart button:hover {
+    background-color: #17172e;
     border-color: #881af0;
+    transform: scale(1.05);
 }
