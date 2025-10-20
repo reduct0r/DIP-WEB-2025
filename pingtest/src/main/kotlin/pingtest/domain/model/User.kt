@@ -13,5 +13,6 @@ data class User(
     val id: Int = 0,
     var username: String,
     var password: String,
-    val isModerator: Boolean = false
+    val isModerator: Boolean = false,
+    var preferences: String? = null
 )

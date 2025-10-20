@@ -2,10 +2,8 @@ package com.dip.pingtest.service
 
 import com.dip.pingtest.config.MinioProperties
 import com.dip.pingtest.domain.model.ServerComponent
-import com.dip.pingtest.domain.model.UserComponentPreference
 import com.dip.pingtest.domain.model.enums.ServerComponentStatus
 import com.dip.pingtest.domain.repository.ComponentRepository
-import com.dip.pingtest.domain.repository.UserComponentPreferenceRepository
 import com.dip.pingtest.domain.repository.UserRepository
 import com.dip.pingtest.infrastructure.dto.ComponentDTO
 import io.minio.GetPresignedObjectUrlArgs
@@ -22,7 +20,6 @@ class ComponentService(
     private val componentRepository: ComponentRepository,
     private val minioClient: MinioClient,
     private val minioProperties: MinioProperties,
-    private val preferenceRepository: UserComponentPreferenceRepository,
     private val userRepository: UserRepository
 ) {
     fun getComponentsAsDomain(filter: String?): List<ServerComponent> {
@@ -120,17 +117,25 @@ class ComponentService(
         component.time, generatePresignedUrl(component.image)
     )
     fun getPreference(userId: Int, componentId: Int): String? {
-        return preferenceRepository.findByUserIdAndComponentId(userId, componentId)?.componentGroup
+        val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
+        val prefs = (user.preferences ?: "").split(";").filter { it.isNotBlank() }.associate {
+            val parts = it.split(":", limit = 2)
+            parts[0] to (parts.getOrNull(1) ?: "")
+        }
+        return prefs[componentId.toString()]
     }
     fun updatePreference(userId: Int, componentId: Int, group: String?) {
-        var pref = preferenceRepository.findByUserIdAndComponentId(userId, componentId)
-        if (pref == null) {
-            val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
-            val component = componentRepository.findById(componentId).orElseThrow { RuntimeException("Component not found") }
-            pref = UserComponentPreference(user = user, component = component, componentGroup = group)
-        } else {
-            pref.componentGroup = group
+        val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
+        val prefs = (user.preferences ?: "").split(";").filter { it.isNotBlank() }.associateTo(mutableMapOf()) {
+            val parts = it.split(":", limit = 2)
+            parts[0] to (parts.getOrNull(1) ?: "")
         }
-        preferenceRepository.save(pref)
+        if (group.isNullOrEmpty()) {
+            prefs.remove(componentId.toString())
+        } else {
+            prefs[componentId.toString()] = group
+        }
+        user.preferences = prefs.entries.joinToString(";") { "${it.key}:${it.value}" }
+        userRepository.save(user)
     }
 }
