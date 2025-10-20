@@ -4,30 +4,17 @@
     <link rel="stylesheet" href="/ping-time-styles.css">
 </head>
 <body>
-<div th:fragment="ping-time-component(item)" class="tile-container" th:if="${item != null and item.component != null}"> <!-- Проверка на null для item и details-page -->
+<div th:fragment="ping-time-component(item)" class="tile-container" th:if="${item != null and item.component != null}">
     <!-- Поля услуги -->
     <img th:src="${item.component.imageUrl}" alt="component icon" class="icon" onerror="this.src='/images/placeholder_111x111.png'">
     <p class="title" th:text="${item.component.title ?: 'Неизвестно'}">База данных</p>
     <p class="description" th:text="${item.component.description ?: 'Нет описания'}">Хранение данных: SQL-запросы, чтение/запись в диск. Время доступа обусловливает при больших объемах.</p> <!-- Короткое description -->
-
     <!-- m-m поля-->
     <div class="time">
         <img th:src="${pingIconUrl}" alt="icon" onerror="this.src='/images/placeholder_23x23.png'">
-        <input type="number" th:value="${item.serverComponentTime}" class="mini-input" placeholder="мс">
-        мс
+        <span th:text="${item.component.time} + ' мс'">10 мс</span>
     </div>
     <div class="mm-fields">
-        <div class="priority">
-            Приоритет
-            <input type="number" th:value="${item.priority}" class="mini-input"> <!-- order как priority -->
-        </div>
-        <!-- Выпадающий список -->
-        <select class="dark-select" th:value="${item.componentGroup ?: 'Нет'}">
-            <option value="БД">БД</option>
-            <option value="Кэш">Кэш</option>
-            <option value="Нет">Нет</option>
-        </select>
-
         <!-- Количество -->
         <div class="quantity">
             Кол-во

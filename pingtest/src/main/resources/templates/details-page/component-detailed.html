@@ -30,6 +30,17 @@
             </div>
         </div>
     </div>
+    <div class="add-to-cart">
+        <form th:action="@{/ping-time/add/{id}(id=${component.id})}" method="post">
+            <label for="group">Выберите БД/Кэш:</label>
+            <select id="group" name="group">
+                <option value="">Нет</option>
+                <option value="БД">БД</option>
+                <option value="Кэш">Кэш</option>
+            </select>
+            <button type="submit">Добавить</button>
+        </form>
+    </div>
     <p class="upper-footer"></p>
 </div>
 </body>

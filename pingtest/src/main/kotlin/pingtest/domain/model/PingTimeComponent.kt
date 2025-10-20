@@ -1,6 +1,5 @@
 package com.dip.pingtest.domain.model
 
-import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.IdClass
@@ -26,9 +25,6 @@ data class PingTimeComponent(
     @JoinColumn(name = "component_id")
     val component: ServerComponent,
     var quantity: Int = 1,
-    @Column(name = "priority")
-    var priority: Int = 0,
     var componentGroup: String? = null,
-    var subtotalTime: Int = 0,
-    var serverComponentTime: Int
+    var subtotalTime: Int = 0
 )

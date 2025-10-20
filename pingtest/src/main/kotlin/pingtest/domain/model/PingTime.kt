@@ -1,12 +1,9 @@
 package com.dip.pingtest.domain.model
 
-import com.dip.pingtest.domain.model.enums.LoadLevel
 import com.dip.pingtest.domain.model.enums.PingTimeStatus
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -21,7 +18,7 @@ import java.time.LocalDateTime
 data class PingTime(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int = 0,
-    @Enumerated(EnumType.STRING)
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
     var status: PingTimeStatus,
     val createdAt: LocalDateTime = LocalDateTime.now(),
     @ManyToOne
@@ -32,12 +29,9 @@ data class PingTime(
     @ManyToOne
     @JoinColumn(name = "moderator_id")
     var moderator: User? = null,
-
     var totalTime: Int = 0,
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "load_level")
-    var loadLevel: LoadLevel = LoadLevel.LOW
+    @Column(name = "load_coefficient")
+    var loadCoefficient: Int? = null
 ) {
     @OneToMany(mappedBy = "pingTime", cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE], orphanRemoval = true)
     val items: MutableList<PingTimeComponent> = mutableListOf()

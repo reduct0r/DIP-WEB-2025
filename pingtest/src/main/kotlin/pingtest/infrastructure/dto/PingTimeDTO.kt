@@ -10,5 +10,5 @@ data class PingTimeDTO(
     val moderatorUsername: String? = null,
     val totalTime: Int,
     val items: List<PingTimeItemDTO>,
-    val loadLevel: String
+    val loadCoefficient: Int?
 )

@@ -7,8 +7,6 @@ data class PingTimeItemDTO(
     val time: Int,
     val imageUrl: String? = null,
     val quantity: Int,
-    val priority: Int,
     val componentGroup: String? = null,
-    val subtotalTime: Int,
-    val serverComponentTime: Int
+    val subtotalTime: Int
 )
