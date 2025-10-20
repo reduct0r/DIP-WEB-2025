@@ -101,7 +101,7 @@ class PingTimeService(
         val pingTime = addServerComponentToTimePing(FIXED_CREATOR_ID, componentId)
         return toDTO(pingTime)
     }
-    fun addServerComponentToTimePing(userId: Int, componentId: Int, componentGroup: String? = null): PingTime {
+    fun addServerComponentToTimePing(userId: Int, componentId: Int): PingTime {
         val component = componentRepository.findById(componentId).orElseThrow { RuntimeException("Server Component not found") }
         var request = pingTimeRepository.findByCreatorIdAndStatus(userId, PingTimeStatus.DRAFT)
         val creator = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
@@ -109,22 +109,20 @@ class PingTimeService(
             request = PingTime(creator = creator, status = PingTimeStatus.DRAFT)
             request = pingTimeRepository.save(request)
         }
+        val preferenceGroup = componentService.getPreference(userId, componentId)
         val existingItem = request.items.find { it.component.id == componentId }
         if (existingItem != null) {
             existingItem.quantity += 1
-            if (componentGroup != null) {
-                existingItem.componentGroup = componentGroup
-            }
             existingItem.subtotalTime = calculateSubtotal(existingItem.component, existingItem.quantity, existingItem.componentGroup)
         } else {
-            val subtotal = calculateSubtotal(component, 1, componentGroup)
+            val subtotal = calculateSubtotal(component, 1, preferenceGroup)
             val item = PingTimeComponent(
                 pingTimeId = request.id,
                 componentId = component.id,
                 pingTime = request,
                 component = component,
                 quantity = 1,
-                componentGroup = componentGroup,
+                componentGroup = preferenceGroup,
                 subtotalTime = subtotal
             )
             request.items.add(item)
@@ -154,8 +152,9 @@ class PingTimeService(
         var subtotal = component.time * quantity
         val dbTime = componentRepository.findByTitle("БД")?.time ?: 0
         val cacheTime = componentRepository.findByTitle("Кэш")?.time ?: 0
-        if (componentGroup == "БД") subtotal += dbTime
-        if (componentGroup == "Кэш") subtotal += cacheTime
+        val groups = componentGroup?.split(",") ?: emptyList()
+        if ("БД" in groups) subtotal += dbTime
+        if ("Кэш" in groups) subtotal += cacheTime
         return subtotal
     }
     private fun calculateBaseTime(request: PingTime): Int {

@@ -31,14 +31,19 @@
         </div>
     </div>
     <div class="add-to-cart">
-        <form th:action="@{/ping-time/add/{id}(id=${component.id})}" method="post">
-            <label for="group">Выберите БД/Кэш:</label>
-            <select id="group" name="group">
-                <option value="">Нет</option>
-                <option value="БД">БД</option>
-                <option value="Кэш">Кэш</option>
-            </select>
-            <button type="submit">Добавить</button>
+        <form th:action="@{/server-component/{id}/update-group(id=${component.id})}" method="post">
+            <label>Выберите БД/Кэш:</label>
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="bd" value="true" th:checked="${isBdChecked}">
+                    БД
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="cache" value="true" th:checked="${isCacheChecked}">
+                    Кэш
+                </label>
+            </div>
+            <button type="submit">Применить</button>
         </form>
     </div>
     <p class="upper-footer"></p>

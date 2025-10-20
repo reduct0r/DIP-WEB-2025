@@ -37,6 +37,8 @@ class ViewController(
         //TODO hardcoded user
         val userId = 1
         val component = componentService.getComponent(id)
+        val currentGroup = componentService.getPreference(userId, id) ?: ""
+        val currentGroups = currentGroup.split(",").map { it.trim() }.toSet()
         val draftRequestId = pingTimeService.getDraftTimePingIdForUser(userId)
         val requestSize = pingTimeService.getTimePingItemCountForUser(userId)
         model.addAttribute("component", component)
@@ -45,7 +47,22 @@ class ViewController(
         model.addAttribute("pingIconUrl", componentService.generatePresignedUrl("ping_icon.svg"))
         model.addAttribute("iconUrl", componentService.generatePresignedUrl("icon.png"))
         model.addAttribute("requestIconUrl", componentService.generatePresignedUrl("cart.png"))
+        model.addAttribute("isBdChecked", currentGroups.contains("БД"))
+        model.addAttribute("isCacheChecked", currentGroups.contains("Кэш"))
         return "details-page/component-detailed"
+    }
+    @PostMapping("/server-component/{id}/update-group")
+    fun updateGroup(@PathVariable id: Int, @RequestParam("bd") bdStr: String?, @RequestParam("cache") cacheStr: String?, httpRequest: HttpServletRequest): String {
+        val userId = 1
+        val isBd = bdStr != null
+        val isCache = cacheStr != null
+        val newGroup = buildList {
+            if (isBd) add("БД")
+            if (isCache) add("Кэш")
+        }.joinToString(",").takeIf { it.isNotEmpty() }
+        componentService.updatePreference(userId, id, newGroup)
+        val referer = httpRequest.getHeader("Referer") ?: "/server-component/$id"
+        return "redirect:$referer"
     }
     @GetMapping("/ping-time/{id}")
     fun viewTimePing(@PathVariable id: Int, model: Model): String {
@@ -63,10 +80,10 @@ class ViewController(
         return "ping-time-page/ping-time"
     }
     @PostMapping("/ping-time/add/{componentId}")
-    fun addToTimePing(@PathVariable componentId: Int, @RequestParam(name = "group", required = false) group: String?, httpRequest: HttpServletRequest): String {
+    fun addToTimePing(@PathVariable componentId: Int, httpRequest: HttpServletRequest): String {
         //TODO hardcoded user
         val userId = 1
-        pingTimeService.addServerComponentToTimePing(userId, componentId, group)
+        pingTimeService.addServerComponentToTimePing(userId, componentId)
         val referer = httpRequest.getHeader("Referer") ?: "/"
         return "redirect:$referer"
     }
