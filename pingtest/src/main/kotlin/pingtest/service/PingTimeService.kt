@@ -109,21 +109,16 @@ class PingTimeService(
             request = PingTime(creator = creator, status = PingTimeStatus.DRAFT)
             request = pingTimeRepository.save(request)
         }
-        val preferenceGroup = componentService.getPreference(userId, componentId)
         val existingItem = request.items.find { it.component.id == componentId }
         if (existingItem != null) {
             existingItem.quantity += 1
-            existingItem.subtotalTime = calculateSubtotal(existingItem.component, existingItem.quantity, existingItem.componentGroup)
         } else {
-            val subtotal = calculateSubtotal(component, 1, preferenceGroup)
             val item = PingTimeComponent(
                 pingTimeId = request.id,
                 componentId = component.id,
                 pingTime = request,
                 component = component,
-                quantity = 1,
-                componentGroup = preferenceGroup,
-                subtotalTime = subtotal
+                quantity = 1
             )
             request.items.add(item)
         }
@@ -135,7 +130,6 @@ class PingTimeService(
         if (request.status != PingTimeStatus.DRAFT) throw RuntimeException("Can only update draft items")
         val item = request.items.find { it.component.id == componentId } ?: throw RuntimeException("Item not found")
         dto.quantity?.let { item.quantity = it }
-        item.subtotalTime = calculateSubtotal(item.component, item.quantity, item.componentGroup)
         recalculateTotal(request)
         val saved = pingTimeRepository.save(request)
         return toDTO(saved)
@@ -148,7 +142,8 @@ class PingTimeService(
         val saved = pingTimeRepository.save(request)
         return toDTO(saved)
     }
-    private fun calculateSubtotal(component: ServerComponent, quantity: Int, componentGroup: String?): Int {
+    fun calculateSubtotal(component: ServerComponent, quantity: Int, userId: Int, componentId: Int): Int {
+        val componentGroup = componentService.getPreference(userId, componentId)
         var subtotal = component.time * quantity
         val dbTime = componentRepository.findByTitle("БД")?.time ?: 0
         val cacheTime = componentRepository.findByTitle("Кэш")?.time ?: 0
@@ -158,7 +153,7 @@ class PingTimeService(
         return subtotal
     }
     private fun calculateBaseTime(request: PingTime): Int {
-        return request.items.sumOf { it.subtotalTime }
+        return request.items.sumOf { calculateSubtotal(it.component, it.quantity, request.creator.id, it.component.id) }
     }
     fun updateTimePing(id: Int, dto: PingTimeUpdateDTO): PingTimeDTO {
         val pingTime = pingTimeRepository.findById(id).orElseThrow { RuntimeException("PingTime not found") }
@@ -191,8 +186,7 @@ class PingTimeService(
                 time = it.component.time,
                 imageUrl = componentService.generatePresignedUrl(it.component.image),
                 quantity = it.quantity,
-                componentGroup = it.componentGroup,
-                subtotalTime = it.subtotalTime
+                subtotalTime = calculateSubtotal(it.component, it.quantity, request.creator.id, it.component.id)
             )
         },
         loadCoefficient = request.loadCoefficient

@@ -53,6 +53,7 @@ class ViewController(
     }
     @PostMapping("/server-component/{id}/update-group")
     fun updateGroup(@PathVariable id: Int, @RequestParam("bd") bdStr: String?, @RequestParam("cache") cacheStr: String?, httpRequest: HttpServletRequest): String {
+        //TODO hardcoded user
         val userId = 1
         val isBd = bdStr != null
         val isCache = cacheStr != null
@@ -70,7 +71,9 @@ class ViewController(
         if (pingTime.status == PingTimeStatus.DELETED) {
             throw RuntimeException("Удаленный расчет отклика сервера")
         }
-        val previewTotalTime = pingTime.items.sumOf { it.subtotalTime } * (pingTime.loadCoefficient ?: 1)
+        val previewTotalTime = pingTime.items.sumOf {
+            pingTimeService.calculateSubtotal(it.component, it.quantity, pingTime.creator.id, it.component.id)
+        } * (pingTime.loadCoefficient ?: 1)
         model.addAttribute("ping_time", pingTime)
         model.addAttribute("previewTotalTime", previewTotalTime)
         model.addAttribute("selectedCoefficient", pingTime.loadCoefficient)
