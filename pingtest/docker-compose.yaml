@@ -102,7 +102,7 @@ services:
 
   # Добавление сервиса Redis
   redis:
-    image: redis:8-alpine
+    image: redis:8.0.3
     container_name: redis_lab
     restart: always
     ports:
@@ -120,6 +120,23 @@ services:
       - "5540:5540"
     volumes:
       - redis_insight_data:/data
+    environment:
+      - RI_APP_PORT=5540
+      - RI_APP_HOST=0.0.0.0
+      - RI_STDOUT_LOGGER=true
+      - RI_FILES_LOGGER=true
+      - RI_LOG_LEVEL=info
+    depends_on:
+      - redis
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis_commander_lab
+    restart: always
+    ports:
+      - "8083:8081"
+    environment:
+      - REDIS_HOSTS=local:redis_lab:6379:0:yourpassword
     depends_on:
       - redis
 
