@@ -111,20 +111,20 @@ services:
     volumes:
       - redis_data:/data
 
-  # Добавление сервиса Redis Commander для UI просмотра Redis
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: redis_commander_lab
+  # Добавление сервиса Redis Insight для UI просмотра Redis
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis_insight_lab
     restart: always
     ports:
-      - "8083:8081"
-    environment:
-      - REDIS_HOSTS=local:redis_lab:6379::yourpassword
+      - "5540:5540"
+    volumes:
+      - redis_insight_data:/data
     depends_on:
       - redis
 
 ## По умолчанию в этой конфигурации используется локальный драйвер docker по умолчанию,
-## Для пользовательских томов замените на конфигурацию драйвера томов.
+## Для пользовательских томов замените на конфигурацию драйвера тома.
 volumes:
   data1-1:
   data1-2:
@@ -136,3 +136,4 @@ volumes:
   data4-2:
   postgres_data:  # volume для PostgreSQL данных
   redis_data:  # volume для Redis данных
+  redis_insight_data:  # volume для Redis Insight данных
