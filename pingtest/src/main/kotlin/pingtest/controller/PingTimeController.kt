@@ -20,18 +20,18 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "Ping Time Requests", description = "API for managing ping time requests and calculations")
+@Tag(name = "Запросы времени отклика", description = "API для управления запросами времени отклика и расчетами")
 @RestController
 @RequestMapping("/api/ping-time")
 class PingTimeController(private val service: PingTimeService) {
 
     @GetMapping("/cart-icon")
-    @Operation(summary = "Get ping time cart icon info", description = "Returns draft ID and item count for the cart icon")
+    @Operation(summary = "Получить информацию иконки корзины времени пинга", description = "Возвращает ID черновика и количество элементов для иконки корзины")
     @SecurityRequirement(name = "bearerAuth")
     fun getTimePingIcon(): TimePingIconDTO = service.getTimePingIcon()
 
     @GetMapping
-    @Operation(summary = "Get all ping time requests", description = "Returns list of ping time requests with optional filters for status and date range")
+    @Operation(summary = "Получить все запросы времени пинга", description = "Возвращает список запросов времени пинга с опциональными фильтрами по статусу и диапазону дат")
     @SecurityRequirement(name = "bearerAuth")
     fun getAll(
         @RequestParam(required = false) status: String?,
@@ -40,29 +40,29 @@ class PingTimeController(private val service: PingTimeService) {
     ): List<PingTimeDTO> = service.getTimePings(status, fromDate, toDate)
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get one ping time request by ID", description = "Returns details of a specific ping time request")
+    @Operation(summary = "Получить один запрос времени пинга по ID", description = "Возвращает детали конкретного запроса времени пинга")
     @SecurityRequirement(name = "bearerAuth")
     fun getOne(@PathVariable id: Int): PingTimeDTO = service.getTimePing(id)
 
     @PutMapping("/{id}/form")
-    @Operation(summary = "Form a ping time request from draft", description = "Changes draft status to formed and sets formation date")
+    @Operation(summary = "Сформировать запрос времени пинга из черновика", description = "Изменяет статус черновика на сформированный и устанавливает дату формирования")
     @SecurityRequirement(name = "bearerAuth")
     fun form(@PathVariable id: Int): PingTimeDTO = service.formTimePing(id)
 
     @PutMapping("/{id}/moderate")
-    @Operation(summary = "Moderate a ping time request", description = "Completes or rejects a formed request (moderator only)")
+    @Operation(summary = "Модерировать запрос времени пинга", description = "Завершает или отклоняет сформированный запрос (только модератор)")
     @SecurityRequirement(name = "bearerAuth")
     fun moderate(@PathVariable id: Int, @RequestBody dto: ModerateActionDTO): PingTimeDTO = service.moderateTimePing(id, dto.action)
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update ping time request", description = "Updates load coefficient and recalculates total time")
+    @Operation(summary = "Обновить запрос времени пинга", description = "Обновляет коэффициент нагрузки и пересчитывает общее время")
     @SecurityRequirement(name = "bearerAuth")
     fun updateTimePing(@PathVariable id: Int, @RequestBody dto: PingTimeUpdateDTO): PingTimeDTO {
         return service.updateTimePing(id, dto)
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete ping time request", description = "Logically deletes a draft or formed request")
+    @Operation(summary = "Удалить запрос времени пинга", description = "Логически удаляет черновик или сформированный запрос")
     @SecurityRequirement(name = "bearerAuth")
     fun delete(@PathVariable id: Int): ResponseEntity<Void> {
         service.deleteTimePing(id)
@@ -71,13 +71,13 @@ class PingTimeController(private val service: PingTimeService) {
 
     // M-M
     @PutMapping("/{requestId}/items/{componentId}")
-    @Operation(summary = "Update item in ping time request", description = "Updates quantity of a component in the request")
+    @Operation(summary = "Обновить элемент в запросе времени пинга", description = "Обновляет количество компонента в запросе")
     @SecurityRequirement(name = "bearerAuth")
     fun updateItem(@PathVariable requestId: Int, @PathVariable componentId: Int, @RequestBody dto: ItemUpdateDTO): PingTimeDTO =
         service.updateItem(requestId, componentId, dto)
 
     @DeleteMapping("/{requestId}/items/{componentId}")
-    @Operation(summary = "Delete item from ping time request", description = "Removes a component from the request")
+    @Operation(summary = "Удалить элемент из запроса времени пинга", description = "Удаляет компонент из запроса")
     @SecurityRequirement(name = "bearerAuth")
     fun deleteItem(@PathVariable requestId: Int, @PathVariable componentId: Int): PingTimeDTO = service.deleteItem(requestId, componentId)
 }

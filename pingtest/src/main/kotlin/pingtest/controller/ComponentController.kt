@@ -11,31 +11,31 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
-@Tag(name = "Server Components", description = "API for managing server components")
+@Tag(name = "Компоненты сервера", description = "API для управления компонентами сервера")
 @RestController
 @RequestMapping("/api/server-components")
 class ComponentController(private val service: ComponentService, private val pingTimeService: PingTimeService) {
 
     @GetMapping
-    @Operation(summary = "Get all components", description = "Returns list of components with optional filter")
+    @Operation(summary = "Получить все компоненты", description = "Возвращает список компонентов с опциональным фильтром")
     fun getAll(@RequestParam(required = false) filter: String?): List<ComponentDTO> = service.getComponents(filter)
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get one component by ID")
+    @Operation(summary = "Получить один компонент по ID")
     fun getOne(@PathVariable id: Int): ComponentDTO = service.getComponent(id)
 
     @PostMapping
-    @Operation(summary = "Create new component")
+    @Operation(summary = "Создать новый компонент")
     @SecurityRequirement(name = "bearerAuth")  // Требует JWT
     fun create(@RequestBody dto: ComponentDTO): ComponentDTO = service.createComponent(dto)
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update component by ID")
+    @Operation(summary = "Обновить компонент по ID")
     @SecurityRequirement(name = "bearerAuth")
     fun update(@PathVariable id: Int, @RequestBody dto: ComponentDTO): ComponentDTO = service.updateComponent(id, dto)
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete component by ID")
+    @Operation(summary = "Удалить компонент по ID")
     @SecurityRequirement(name = "bearerAuth")
     fun delete(@PathVariable id: Int): ResponseEntity<Void> {
         service.deleteComponent(id)
@@ -43,12 +43,12 @@ class ComponentController(private val service: ComponentService, private val pin
     }
 
     @PostMapping("/{id}/image")
-    @Operation(summary = "Upload image for component")
+    @Operation(summary = "Загрузить изображение для компонента")
     @SecurityRequirement(name = "bearerAuth")
     fun uploadImage(@PathVariable id: Int, @RequestParam("file") file: MultipartFile): String = service.uploadImage(id, file)
 
     @PostMapping("/{componentId}/add-to-draft")
-    @Operation(summary = "Add component to draft ping time")
+    @Operation(summary = "Добавить компонент в черновик времени пинга")
     @SecurityRequirement(name = "bearerAuth")
     fun addToDraft(@PathVariable componentId: Int): PingTimeDTO = pingTimeService.addServerComponentToDraft(componentId)
 }

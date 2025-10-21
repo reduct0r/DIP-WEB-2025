@@ -13,21 +13,21 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "Users", description = "API for user registration and profile management")
+@Tag(name = "Пользователи", description = "API для регистрации пользователей и управления профилем")
 @RestController
 class UserController(private val service: UserService) {
 
     @PostMapping("/api/users/register")
-    @Operation(summary = "Register a new user", description = "Creates a new user account with username and password")
+    @Operation(summary = "Зарегистрировать нового пользователя", description = "Создает новую учетную запись пользователя с именем пользователя и паролем")
     fun register(@RequestBody dto: UserRegistrationDTO): UserDTO = service.register(dto)
 
     @GetMapping("/api/users/me")
-    @Operation(summary = "Get current user profile", description = "Returns details of the authenticated user")
+    @Operation(summary = "Получить профиль текущего пользователя", description = "Возвращает детали аутентифицированного пользователя")
     @SecurityRequirement(name = "bearerAuth")
     fun getMe(): UserDTO = service.getUser(service.getCurrentUserId())
 
     @PutMapping("/api/users/me")
-    @Operation(summary = "Update current user profile", description = "Updates username or password for the authenticated user")
+    @Operation(summary = "Обновить профиль текущего пользователя", description = "Обновляет имя пользователя или пароль для аутентифицированного пользователя")
     @SecurityRequirement(name = "bearerAuth")
     fun updateMe(@RequestBody dto: UserUpdateDTO): UserDTO = service.updateUser(service.getCurrentUserId(), dto)
 }
