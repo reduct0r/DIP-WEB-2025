@@ -11,12 +11,10 @@ import com.dip.pingtest.infrastructure.dto.ItemUpdateDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeItemDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeUpdateDTO
-import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.util.NoSuchElementException
 
 @Service
 @Transactional
@@ -59,10 +57,10 @@ class PingTimeService(
     }
 
     fun getTimePing(id: Int): PingTimeDTO {
-        val pingTime = pingTimeRepository.findById(id).orElseThrow { NoSuchElementException("Ping Time Request not found") }
+        val pingTime = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (pingTime.status == PingTimeStatus.DELETED) throw RuntimeException("Ping Time Request deleted")
         if (getCurrentRole() == Role.USER && pingTime.creator.id != getCurrentUserId()) {
-            throw AccessDeniedException("Access denied: Not the creator")
+            throw RuntimeException("Access denied: Not the creator")
         }
         return toDTO(pingTime)
     }
@@ -71,7 +69,7 @@ class PingTimeService(
         val pingTime = pingTimeRepository.findById(id).orElse(null)
         if (pingTime != null) {
             if (getCurrentRole() == Role.USER && pingTime.creator.id != getCurrentUserId()) {
-                throw AccessDeniedException("Access denied: Not the creator")
+                throw RuntimeException("Access denied: Not the creator")
             }
             pingTime.items.forEach { it.component.imageUrl = componentService.generatePresignedUrl(it.component.image) }
         }
@@ -87,20 +85,19 @@ class PingTimeService(
     }
 
     fun formTimePing(id: Int): PingTimeDTO {
-        val request = pingTimeRepository.findById(id).orElseThrow { NoSuchElementException("Ping Time Request not found") }
-        if (request.status != PingTimeStatus.DRAFT) {
-            throw RuntimeException("Only draft can be formed")
+        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
+        if (request.status != PingTimeStatus.DRAFT || request.creator.id != getCurrentUserId()) {
+            throw RuntimeException("Only creator can form draft")
         }
         if (request.items.isEmpty()) throw RuntimeException("Cannot form empty Ping Time requests")
         request.status = PingTimeStatus.FORMED
         request.formationDate = LocalDateTime.now()
-        request.moderator = userRepository.findUserById(getCurrentUserId())
         val saved = pingTimeRepository.save(request)
         return toDTO(saved)
     }
 
     fun moderateTimePing(id: Int, action: String): PingTimeDTO {
-        val request = pingTimeRepository.findById(id).orElseThrow { NoSuchElementException("Ping Time Request not found") }
+        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (request.status != PingTimeStatus.FORMED) throw RuntimeException("Only formed can be moderated")
         request.completionDate = LocalDateTime.now()
         request.moderator = userRepository.findById(getCurrentUserId()).orElseThrow()
@@ -119,9 +116,9 @@ class PingTimeService(
     }
 
     fun deleteTimePing(id: Int) {
-        val request = pingTimeRepository.findById(id).orElseThrow { NoSuchElementException("Ping Time Request not found") }
+        val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (request.creator.id != getCurrentUserId() || (request.status != PingTimeStatus.DRAFT && request.status != PingTimeStatus.FORMED)) {
-            throw AccessDeniedException("Only creator can delete draft or formed")
+            throw RuntimeException("Only creator can delete draft or formed")
         }
         request.status = PingTimeStatus.DELETED
         pingTimeRepository.save(request)
@@ -137,9 +134,9 @@ class PingTimeService(
     }
 
     fun addServerComponentToTimePing(userId: Int, componentId: Int): PingTime {
-        val component = componentRepository.findById(componentId).orElseThrow { NoSuchElementException("Server Component not found") }
+        val component = componentRepository.findById(componentId).orElseThrow { RuntimeException("Server Component not found") }
         var request = pingTimeRepository.findByCreatorIdAndStatus(userId, PingTimeStatus.DRAFT)
-        val creator = userRepository.findById(userId).orElseThrow { NoSuchElementException("User not found") }
+        val creator = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
         if (request == null) {
             request = PingTime(creator = creator, status = PingTimeStatus.DRAFT)
             request = pingTimeRepository.save(request)
@@ -162,9 +159,9 @@ class PingTimeService(
     }
 
     fun updateItem(requestId: Int, componentId: Int, dto: ItemUpdateDTO): PingTimeDTO {
-        val request = pingTimeRepository.findById(requestId).orElseThrow { NoSuchElementException("Ping Time Request not found") }
-        if (request.status != PingTimeStatus.DRAFT || request.creator.id != getCurrentUserId()) throw AccessDeniedException("Can only update own draft items")
-        val item = request.items.find { it.component.id == componentId } ?: throw NoSuchElementException("Item not found")
+        val request = pingTimeRepository.findById(requestId).orElseThrow { RuntimeException("Ping Time Request not found") }
+        if (request.status != PingTimeStatus.DRAFT || request.creator.id != getCurrentUserId()) throw RuntimeException("Can only update own draft items")
+        val item = request.items.find { it.component.id == componentId } ?: throw RuntimeException("Item not found")
         dto.quantity?.let { item.quantity = it }
         recalculateTotal(request)
         val saved = pingTimeRepository.save(request)
@@ -172,8 +169,8 @@ class PingTimeService(
     }
 
     fun deleteItem(requestId: Int, componentId: Int): PingTimeDTO {
-        val request = pingTimeRepository.findById(requestId).orElseThrow { NoSuchElementException("Ping Time Request not found") }
-        if (request.status != PingTimeStatus.DRAFT || request.creator.id != getCurrentUserId()) throw AccessDeniedException("Can only delete from own draft")
+        val request = pingTimeRepository.findById(requestId).orElseThrow { RuntimeException("Ping Time Request not found") }
+        if (request.status != PingTimeStatus.DRAFT || request.creator.id != getCurrentUserId()) throw RuntimeException("Can only delete from own draft")
         request.items.removeIf { it.component.id == componentId }
         recalculateTotal(request)
         val saved = pingTimeRepository.save(request)
@@ -196,9 +193,9 @@ class PingTimeService(
     }
 
     fun updateTimePing(id: Int, dto: PingTimeUpdateDTO): PingTimeDTO {
-        val pingTime = pingTimeRepository.findById(id).orElseThrow { NoSuchElementException("PingTime not found") }
+        val pingTime = pingTimeRepository.findById(id).orElseThrow { RuntimeException("PingTime not found") }
         if (pingTime.creator.id != getCurrentUserId() && getCurrentRole() != Role.MODERATOR) {
-            throw AccessDeniedException("Access denied")
+            throw RuntimeException("Access denied")
         }
         dto.loadCoefficient?.let {
             pingTime.loadCoefficient = it
