@@ -14,4 +14,16 @@ interface PingTimeRepository : JpaRepository<PingTime, Int> {
         from: LocalDateTime?,
         to: LocalDateTime?
     ): List<PingTime>
+
+    fun findAllByStatusNotIn(statuses: List<PingTimeStatus>): List<PingTime>
+
+    fun findAllByStatusNotInAndFormationDateGreaterThanEqual(
+        statuses: List<PingTimeStatus>,
+        from: LocalDateTime
+    ): List<PingTime>
+
+    fun findAllByStatusNotInAndFormationDateLessThanEqual(
+        statuses: List<PingTimeStatus>,
+        to: LocalDateTime
+    ): List<PingTime>
 }

@@ -45,7 +45,14 @@ class PingTimeService(
         val excludedStatuses = listOf(PingTimeStatus.DELETED, PingTimeStatus.DRAFT)
         val from = fromDate?.let { LocalDateTime.parse(it) }
         val to = toDate?.let { LocalDateTime.parse(it) }
-        var pingTimes = pingTimeRepository.findAllByStatusNotInAndFormationDateBetween(excludedStatuses, from, to)
+
+        var pingTimes: List<PingTime> = when {
+            from == null && to == null -> pingTimeRepository.findAllByStatusNotIn(excludedStatuses)
+            from == null -> pingTimeRepository.findAllByStatusNotInAndFormationDateLessThanEqual(excludedStatuses, to!!)
+            to == null -> pingTimeRepository.findAllByStatusNotInAndFormationDateGreaterThanEqual(excludedStatuses, from)
+            else -> pingTimeRepository.findAllByStatusNotInAndFormationDateBetween(excludedStatuses, from, to)
+        }
+
         status?.let { s ->
             val enumStatus = PingTimeStatus.valueOf(s.uppercase())
             pingTimes = pingTimes.filter { it.status == enumStatus }
