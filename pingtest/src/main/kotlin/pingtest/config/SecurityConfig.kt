@@ -1,7 +1,9 @@
 package com.dip.pingtest.config
 
+import com.dip.pingtest.controller.ErrorResponse
 import com.dip.pingtest.service.JwtService
 import com.dip.pingtest.service.RedisBlacklistService
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -23,6 +25,7 @@ import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.core.authority.SimpleGrantedAuthority
+import java.time.LocalDateTime
 
 @Configuration
 @EnableMethodSecurity
@@ -38,7 +41,7 @@ class SecurityConfig(private val jwtService: JwtService, private val blacklistSe
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .csrf { it.disable() }
-            .headers { it.frameOptions { it.disable() } }  // Disable frame options for Swagger UI
+            .headers { it.frameOptions { it.disable() } }
             .sessionManagement { it.sessionCreationPolicy(SessionCreationPolicy.STATELESS) }
             .authorizeHttpRequests {
                 it.requestMatchers(
@@ -52,10 +55,20 @@ class SecurityConfig(private val jwtService: JwtService, private val blacklistSe
                 it.requestMatchers(AntPathRequestMatcher("/api/server-components/**", "GET")).permitAll()
                 it.requestMatchers("/api/server-components/**").hasAnyRole("USER", "MODERATOR")
                 it.requestMatchers("/api/ping-time/moderate/**").hasRole("MODERATOR")
+                it.requestMatchers("/api/ping-time/*/form").hasRole("MODERATOR")
                 it.requestMatchers("/api/users/register").permitAll()
                 it.requestMatchers("/**").authenticated()
             }
+            .exceptionHandling {
+                it.authenticationEntryPoint { request, response, authException ->
+                    response.status = HttpServletResponse.SC_UNAUTHORIZED
+                }
+                it.accessDeniedHandler { request, response, accessDeniedException ->
+                    response.status = HttpServletResponse.SC_FORBIDDEN
+                }
+            }
             .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter::class.java)
+
         return http.build()
     }
 

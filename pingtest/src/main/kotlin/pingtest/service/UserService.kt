@@ -10,9 +10,11 @@ import com.dip.pingtest.infrastructure.dto.UserUpdateDTO
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import java.util.NoSuchElementException
 
 @Service
 class UserService(
@@ -31,12 +33,12 @@ class UserService(
     }
 
     fun getUser(userId: Int): UserDTO {
-        val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
+        val user = userRepository.findById(userId).orElseThrow { NoSuchElementException("User not found") }
         return UserDTO(user.id, user.username, user.role == Role.MODERATOR)
     }
 
     fun updateUser(userId: Int, dto: UserUpdateDTO): UserDTO {
-        val user = userRepository.findById(userId).orElseThrow { RuntimeException("User not found") }
+        val user = userRepository.findById(userId).orElseThrow { NoSuchElementException("User not found") }
         dto.username?.let { user.username = it }
         dto.password?.let { user.password = passwordEncoder.encode(it) }
         val saved = userRepository.save(user)
@@ -44,8 +46,8 @@ class UserService(
     }
 
     fun authenticate(dto: LoginDTO, response: HttpServletResponse): Map<String, String> {
-        val user = userRepository.findByUsername(dto.username) ?: throw RuntimeException("Invalid credentials")
-        if (!passwordEncoder.matches(dto.password, user.password)) throw RuntimeException("Invalid credentials")
+        val user = userRepository.findByUsername(dto.username) ?: throw BadCredentialsException("Invalid credentials")
+        if (!passwordEncoder.matches(dto.password, user.password)) throw BadCredentialsException("Invalid credentials")
         val token = jwtService.generateToken(user.id, user.role.name)
         val refreshToken = jwtService.generateRefreshToken(user.id)
         addCookie(response, "jwt", token, (jwtService.expiration / 1000).toInt())
@@ -61,9 +63,9 @@ class UserService(
     }
 
     fun refresh(response: HttpServletResponse, request: HttpServletRequest): Map<String, String> {
-        val refreshToken = request.cookies?.find { it.name == "refresh" }?.value ?: throw RuntimeException("No refresh token")
+        val refreshToken = request.cookies?.find { it.name == "refresh" }?.value ?: throw BadCredentialsException("No refresh token")
         if (!jwtService.validateToken(refreshToken) || blacklistService.isBlacklisted(refreshToken)) {
-            throw RuntimeException("Invalid refresh token")
+            throw BadCredentialsException("Invalid refresh token")
         }
         val claims = jwtService.getClaims(refreshToken)
         val userId = claims["userId"] as Int
