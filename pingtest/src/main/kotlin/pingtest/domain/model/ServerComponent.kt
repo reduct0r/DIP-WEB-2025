@@ -25,4 +25,5 @@ data class ServerComponent(
     var status: ServerComponentStatus = ServerComponentStatus.ACTIVE,
     @Transient
     var imageUrl: String? = null,
+    var isDataBaseUsage: Boolean? = null
 )

@@ -6,5 +6,6 @@ data class ComponentDTO(
     val description: String,
     val longDescription: String,
     val time: Int,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    var isDataBaseUsage: Boolean? = null
 )
