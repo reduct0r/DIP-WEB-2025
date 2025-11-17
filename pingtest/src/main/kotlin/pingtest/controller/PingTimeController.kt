@@ -27,7 +27,6 @@ class PingTimeController(private val service: PingTimeService) {
 
     @GetMapping("/cart-icon")
     @Operation(summary = "Получить информацию иконки корзины времени пинга", description = "Возвращает ID черновика и количество элементов для иконки корзины")
-    @SecurityRequirement(name = "bearerAuth")
     fun getTimePingIcon(): TimePingIconDTO = service.getTimePingIcon()
 
     @GetMapping

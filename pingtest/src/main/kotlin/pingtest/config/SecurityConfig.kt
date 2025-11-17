@@ -53,6 +53,7 @@ class SecurityConfig(private val jwtService: JwtService, private val blacklistSe
                     "/webjars/**"
                 ).permitAll()
                 it.requestMatchers(AntPathRequestMatcher("/api/server-components/**", "GET")).permitAll()
+                it.requestMatchers(AntPathRequestMatcher("/api/ping-time/cart-icon")).permitAll()
                 it.requestMatchers(AntPathRequestMatcher("/api/ping-time", "PUT")).hasRole("MODERATOR")
                 it.requestMatchers("/api/server-components/**").hasAnyRole("USER", "MODERATOR")
                 it.requestMatchers("/api/ping-time/*/moderate/**").hasRole("MODERATOR")

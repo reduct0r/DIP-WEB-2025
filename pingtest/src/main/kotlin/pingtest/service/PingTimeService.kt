@@ -37,8 +37,12 @@ class PingTimeService(
     }
 
     fun getTimePingIcon(): TimePingIconDTO {
+        val auth = SecurityContextHolder.getContext().authentication
+        if (auth == null || !auth.isAuthenticated || auth.principal == "anonymousUser") {
+            return TimePingIconDTO(-1, 0)
+        }
         val draft = pingTimeRepository.findByCreatorIdAndStatus(getCurrentUserId(), PingTimeStatus.DRAFT)
-        return TimePingIconDTO(draft?.id, draft?.items?.size ?: 0)
+        return TimePingIconDTO(draft?.id ?: -1, draft?.items?.size ?: 0)
     }
 
     fun getTimePings(status: String?, fromDate: String?, toDate: String?): List<PingTimeDTO> {
