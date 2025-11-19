@@ -43,7 +43,16 @@ class SecurityConfig(private val jwtService: JwtService, private val blacklistSe
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val config = CorsConfiguration()
-        config.allowedOrigins = listOf("http://tauri.localhost", "tauri://localhost")
+        config.allowedOrigins = listOf(
+            "http://tauri.localhost",
+            "tauri://localhost",
+            "tauri://localhost",
+            "https://reduct0r.github.io",
+            "https://192.168.15.7:4173",
+            "https://192.168.15.7:3000",
+            "http://192.168.15.7:4173",
+            "http://localhost:4173"
+        )
         config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         config.allowedHeaders = listOf("*")
         config.exposedHeaders = listOf("Set-Cookie")
