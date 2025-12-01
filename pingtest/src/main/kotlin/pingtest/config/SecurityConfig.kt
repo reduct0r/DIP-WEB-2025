@@ -51,7 +51,8 @@ class SecurityConfig(private val jwtService: JwtService, private val blacklistSe
             "https://192.168.15.7:4173",
             "https://192.168.15.7:3000",
             "http://192.168.15.7:4173",
-            "http://localhost:4173"
+            "http://localhost:4173",
+            "https://localhost:3000"
         )
         config.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         config.allowedHeaders = listOf("*")
