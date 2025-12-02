@@ -85,7 +85,7 @@ class UserService(
     private fun addCookie(response: HttpServletResponse, name: String, value: String, maxAge: Int) {
         val cookie = Cookie(name, value)
         cookie.isHttpOnly = true
-        cookie.secure = true
+        //cookie.secure = true
         cookie.path = "/"
         cookie.maxAge = maxAge
         response.addCookie(cookie)
