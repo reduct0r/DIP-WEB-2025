@@ -16,7 +16,7 @@ class AuthController(private val service: UserService) {
 
     @PostMapping("/api/auth/login")
     @Operation(summary = "Аутентифицировать пользователя и установить JWT в cookie", description = "Входит в систему пользователя с учетными данными и устанавливает JWT и токены обновления в cookies")
-    fun login(@RequestBody dto: LoginDTO, response: HttpServletResponse): Map<String, String> = service.authenticate(dto, response)
+    fun login(@RequestBody dto: LoginDTO, request: HttpServletRequest, response: HttpServletResponse): Map<String, String> = service.authenticate(dto, request, response)
 
     @PostMapping("/api/auth/logout")
     @Operation(summary = "Выйти из системы пользователя и внести JWT в черный список", description = "Инвалидирует текущий JWT, добавляя его в черный список в Redis и очищает cookies")

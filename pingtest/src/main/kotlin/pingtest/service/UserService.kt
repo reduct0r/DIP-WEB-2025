@@ -10,6 +10,8 @@ import com.dip.pingtest.infrastructure.dto.UserUpdateDTO
 import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.http.HttpHeaders
+import org.springframework.http.ResponseCookie
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -45,13 +47,13 @@ class UserService(
         return UserDTO(saved.id, saved.username, saved.role == Role.MODERATOR)
     }
 
-    fun authenticate(dto: LoginDTO, response: HttpServletResponse): Map<String, String> {
+    fun authenticate(dto: LoginDTO, request: HttpServletRequest, response: HttpServletResponse): Map<String, String> {
         val user = userRepository.findByUsername(dto.username) ?: throw BadCredentialsException("Invalid credentials")
         if (!passwordEncoder.matches(dto.password, user.password)) throw BadCredentialsException("Invalid credentials")
         val token = jwtService.generateToken(user.id, user.role.name)
         val refreshToken = jwtService.generateRefreshToken(user.id)
-        addCookie(response, "jwt", token, (jwtService.expiration / 1000).toInt())
-        addCookie(response, "refresh", refreshToken, (jwtService.refreshExpiration / 1000).toInt())
+        addCookie(response, "jwt", token, (jwtService.expiration / 1000).toInt(), request)
+        addCookie(response, "refresh", refreshToken, (jwtService.refreshExpiration / 1000).toInt(), request)
         return mapOf("message" to "Authenticated")
     }
 
@@ -72,8 +74,8 @@ class UserService(
         val user = userRepository.findById(userId).orElseThrow()
         val newToken = jwtService.generateToken(userId, user.role.name)
         val newRefresh = jwtService.generateRefreshToken(userId)
-        addCookie(response, "jwt", newToken, (jwtService.expiration / 1000).toInt())
-        addCookie(response, "refresh", newRefresh, (jwtService.refreshExpiration / 1000).toInt())
+        addCookie(response, "jwt", newToken, (jwtService.expiration / 1000).toInt(), request)
+        addCookie(response, "refresh", newRefresh, (jwtService.refreshExpiration / 1000).toInt(), request)
         return mapOf("message" to "Refreshed")
     }
 
@@ -82,13 +84,22 @@ class UserService(
         return auth.principal as Int
     }
 
-    private fun addCookie(response: HttpServletResponse, name: String, value: String, maxAge: Int) {
-        val cookie = Cookie(name, value)
-        cookie.isHttpOnly = true
-        //cookie.secure = true
-        cookie.path = "/"
-        cookie.maxAge = maxAge
-        response.addCookie(cookie)
+    private fun addCookie(response: HttpServletResponse, name: String, value: String, maxAge: Int, request: HttpServletRequest) {
+        val cookie = ResponseCookie.from(name, value)
+            .httpOnly(true)
+            .sameSite("None")
+            .secure(
+                if (request.getHeader("Origin") == "https://reduct0r.github.io") {
+                    true
+                } else {
+                    request.isSecure
+                }
+            )
+            .path("/")
+            .maxAge(maxAge.toLong())
+            .build()
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString())
     }
 
     private fun deleteCookie(response: HttpServletResponse, name: String) {
