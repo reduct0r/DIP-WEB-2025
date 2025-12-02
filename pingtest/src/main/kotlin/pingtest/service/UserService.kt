@@ -85,15 +85,12 @@ class UserService(
     }
 
     private fun addCookie(response: HttpServletResponse, name: String, value: String, maxAge: Int, request: HttpServletRequest) {
+        print(request.getHeader("Origin"))
         val cookie = ResponseCookie.from(name, value)
             .httpOnly(true)
             .sameSite("None")
             .secure(
-                if (request.getHeader("Origin") == "https://reduct0r.github.io") {
-                    true
-                } else {
-                    request.isSecure
-                }
+                !request.getHeader("Origin").isNullOrEmpty()
             )
             .path("/")
             .maxAge(maxAge.toLong())
