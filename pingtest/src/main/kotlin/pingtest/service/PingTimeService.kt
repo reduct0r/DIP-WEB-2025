@@ -14,7 +14,15 @@ import com.dip.pingtest.infrastructure.dto.PingTimeUpdateDTO
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.RestTemplate
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import org.springframework.http.converter.StringHttpMessageConverter
+import com.fasterxml.jackson.databind.ObjectMapper
 import java.time.LocalDateTime
+import java.nio.charset.StandardCharsets
 
 @Service
 @Transactional
@@ -22,8 +30,14 @@ class PingTimeService(
     private val pingTimeRepository: PingTimeRepository,
     private val componentRepository: ComponentRepository,
     private val userRepository: UserRepository,
-    private val componentService: ComponentService
+    private val componentService: ComponentService,
+    private val objectMapper: ObjectMapper
 ) {
+    private val restTemplate: RestTemplate = RestTemplate().apply {
+        messageConverters.add(StringHttpMessageConverter(StandardCharsets.UTF_8))
+        messageConverters.add(MappingJackson2HttpMessageConverter())
+    }
+    private val asyncServiceUrl = "http://localhost:8000/api/ping-time/async-calculate"
 
     private fun getCurrentUserId(): Int {
         val auth = SecurityContextHolder.getContext().authentication
@@ -114,8 +128,28 @@ class PingTimeService(
         request.moderator = userRepository.findById(getCurrentUserId()).orElseThrow()
         when (action.uppercase()) {
             "COMPLETE" -> {
-                recalculateTotal(request)
+                // Рассчитываем базовое время для отправки в асинхронный сервис
+                // НО НЕ сохраняем его в БД - оно будет обновлено после получения результата от асинхронного сервиса
+                val baseTime = calculateBaseTime(request)
+                val multiplier = request.loadCoefficient ?: 1
+                val calculatedTotalTime = baseTime * multiplier
+                
+                println("Завершение заявки ID=${request.id}: baseTime=$baseTime, multiplier=$multiplier, calculatedTotalTime=$calculatedTotalTime")
+                
+                // Обнуляем totalTime - оно будет заполнено асинхронным сервисом
+                request.totalTime = null
                 request.status = PingTimeStatus.COMPLETED
+                val saved = pingTimeRepository.save(request)
+                
+                println("Сохранена заявка с totalTime=${saved.totalTime}")
+                
+                // Вызываем асинхронный сервис для расчета оптимизированного времени
+                // Передаем рассчитанное время, но не сохраняем его в БД
+                callAsyncService(saved, calculatedTotalTime)
+                
+                val dto = toDTO(saved)
+                println("Возвращаемый DTO totalTime=${dto.totalTime}")
+                return dto
             }
             "REJECT" -> {
                 request.status = PingTimeStatus.REJECTED
@@ -124,6 +158,58 @@ class PingTimeService(
         }
         val saved = pingTimeRepository.save(request)
         return toDTO(saved)
+    }
+    
+    private fun callAsyncService(pingTime: PingTime, calculatedTotalTime: Int) {
+        try {
+            // Формируем данные для отправки в асинхронный сервис
+            // Отправляем рассчитанное время заявки для расчета оптимизированного значения
+            val payload = mapOf(
+                "request_id" to pingTime.id,
+                "totalTime" to calculatedTotalTime
+            )
+            
+            // Отправляем запрос асинхронно (без ожидания ответа)
+            Thread {
+                try {
+                    println("Вызов асинхронного сервиса: request_id=${pingTime.id}, totalTime=$calculatedTotalTime")
+                    println("Payload: $payload")
+                    
+                    // Сериализуем payload в JSON строку
+                    val jsonPayload = objectMapper.writeValueAsString(payload)
+                    println("JSON payload: $jsonPayload")
+                    
+                    val headers = HttpHeaders()
+                    headers.contentType = MediaType.APPLICATION_JSON
+                    val httpRequest = HttpEntity(jsonPayload, headers)
+                    
+                    println("Отправка запроса на: $asyncServiceUrl")
+                    val response = restTemplate.postForObject(asyncServiceUrl, httpRequest, Map::class.java)
+                    println("Ответ от асинхронного сервиса: $response")
+                } catch (e: Exception) {
+                    println("Ошибка при вызове асинхронного сервиса: ${e.message}")
+                    e.printStackTrace()
+                }
+            }.start()
+        } catch (e: Exception) {
+            println("Ошибка при подготовке запроса к асинхронному сервису: ${e.message}")
+        }
+    }
+    
+    fun updateAsyncResults(requestId: Int, token: String, optimizedTotalTime: Int) {
+        // Проверка токена
+        val expectedToken = "MY_SECRET_TOKEN_8BYTES"
+        if (token != expectedToken) {
+            throw RuntimeException("Invalid token")
+        }
+        
+        val pingTime = pingTimeRepository.findById(requestId).orElseThrow { 
+            RuntimeException("Ping Time Request not found") 
+        }
+        
+        // Обновляем итоговое время заявки оптимизированным значением
+        pingTime.totalTime = optimizedTotalTime
+        pingTimeRepository.save(pingTime)
     }
 
     fun deleteTimePing(id: Int) {
@@ -217,21 +303,20 @@ class PingTimeService(
     }
 
     private fun recalculateTotal(pingTime: PingTime) {
-        val baseTime = calculateBaseTime(pingTime)
-        val multiplier = pingTime.loadCoefficient ?: 1
-        pingTime.totalTime = baseTime * multiplier
+        // totalTime рассчитывается только при завершении модератором
+        // Для черновиков и сформированных заявок totalTime остается null
+        // и будет заполнен асинхронным сервисом после завершения
+        if (pingTime.status == PingTimeStatus.COMPLETED && pingTime.totalTime != null) {
+            // Если заявка уже завершена и totalTime установлен, пересчитываем только если нужно
+            // Но обычно это не нужно, так как totalTime устанавливается асинхронным сервисом
+            return
+        }
+        // Для всех остальных статусов не устанавливаем totalTime
+        // Он будет null до завершения модератором
     }
 
-    private fun toDTO(request: PingTime): PingTimeDTO = PingTimeDTO(
-        id = request.id,
-        status = request.status.name,
-        createdAt = request.createdAt.toString(),
-        creatorUsername = request.creator.username,
-        formationDate = request.formationDate?.toString(),
-        completionDate = request.completionDate?.toString(),
-        moderatorUsername = request.moderator?.username,
-        totalTime = request.totalTime,
-        items = request.items.map {
+    private fun toDTO(request: PingTime): PingTimeDTO {
+        val items = request.items.map {
             PingTimeItemDTO(
                 componentId = it.component.id,
                 title = it.component.title,
@@ -241,7 +326,21 @@ class PingTimeService(
                 quantity = it.quantity,
                 subtotalTime = calculateSubtotal(it.component, it.quantity, request.creator.id, it.component.id)
             )
-        },
-        loadCoefficient = request.loadCoefficient
-    )
+        }
+        
+        val dto = PingTimeDTO(
+            id = request.id,
+            status = request.status.name,
+            createdAt = request.createdAt.toString(),
+            creatorUsername = request.creator.username,
+            formationDate = request.formationDate?.toString(),
+            completionDate = request.completionDate?.toString(),
+            moderatorUsername = request.moderator?.username,
+            totalTime = request.totalTime,  // Может быть null, если еще не рассчитано асинхронным сервисом
+            items = items,
+            loadCoefficient = request.loadCoefficient
+        )
+        println("toDTO: request.totalTime=${request.totalTime}, dto.totalTime=${dto.totalTime}")
+        return dto
+    }
 }

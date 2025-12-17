@@ -79,4 +79,16 @@ class PingTimeController(private val service: PingTimeService) {
     @Operation(summary = "Удалить элемент из запроса времени пинга", description = "Удаляет компонент из запроса")
     @SecurityRequirement(name = "bearerAuth")
     fun deleteItem(@PathVariable requestId: Int, @PathVariable componentId: Int): PingTimeDTO = service.deleteItem(requestId, componentId)
+    
+    @PutMapping("/async-result")
+    @Operation(summary = "Принять результаты от асинхронного сервиса", description = "Обновляет итоговое время заявки оптимизированным значением")
+    fun updateAsyncResult(@RequestBody body: Map<String, Any>): ResponseEntity<Map<String, String>> {
+        val token = body["token"] as? String ?: throw RuntimeException("Token is required")
+        val requestId = (body["request_id"] as? Number)?.toInt() ?: throw RuntimeException("request_id is required")
+        val optimizedTotalTime = (body["optimizedTotalTime"] as? Number)?.toInt() 
+            ?: throw RuntimeException("optimizedTotalTime is required")
+        
+        service.updateAsyncResults(requestId, token, optimizedTotalTime)
+        return ResponseEntity.ok(mapOf("status" to "ok"))
+    }
 }

@@ -29,7 +29,8 @@ data class PingTime(
     @ManyToOne
     @JoinColumn(name = "moderator_id")
     var moderator: User? = null,
-    var totalTime: Int? = 0,
+    @Column(name = "total_time", nullable = true)
+    var totalTime: Int? = null,
     @Column(name = "load_coefficient")
     var loadCoefficient: Int? = null
 ) {
