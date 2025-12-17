@@ -198,7 +198,7 @@ class PingTimeService(
     
     fun updateAsyncResults(requestId: Int, token: String, optimizedTotalTime: Int) {
         // Проверка токена
-        val expectedToken = "MY_SECRET_TOKEN_8BYTES"
+        val expectedToken = "SECRET8B"  // Токен для авторизации (8 байт)
         if (token != expectedToken) {
             throw RuntimeException("Invalid token")
         }
