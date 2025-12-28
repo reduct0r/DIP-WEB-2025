@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="/styles.css">
     <title>PINGTEST</title>
 </head>
 <body>
 <div class="page-wrapper">
     <div class="header-main">
         <a th:href="@{/}" class="logo-group">
-            <img th:src="${minioBaseUrl} + 'icon.png'" alt="icon" onerror="this.src='images/placeholder_30x30.png'">
+            <img th:src="${iconUrl}" alt="icon" onerror="this.src='images/images/icon.png'">
             <span class="logo-title">PINGTEST</span>
         </a>
     </div>
@@ -19,9 +19,9 @@
         <div class="welcome-title">Расчет времени отклика веб-приложения</div>
         <div class="search-holder">
             <form th:action="@{/}" method="get" class="search-bar">
-                <input type="text" name="filter" th:value="${filter}" placeholder="Поиск услуг">
+                <input type="text" name="filter" th:value="${filter}" placeholder="Поиск серверных компонентов">
                 <button type="submit" class="search-button">
-                    <img th:src="${minioBaseUrl} + 'search_icon.svg'" alt="icon" onerror="this.src='images/placeholder_29x29.png'">
+                    <img th:src="${searchIconUrl}" alt="icon" onerror="this.src='images/placeholder_29x29.png'">
                 </button>
             </form>
         </div>
@@ -39,10 +39,15 @@
 
 <div class="footer">Reduct0r 2025</div>
 
-<a th:href="@{/request/1}" class="request-icon">
-    <img th:src="${minioBaseUrl} + 'cart.png'" onerror="this.src='images/placeholder_85x89.png'">
-    <span class="request-badge" th:if="${requestSize > 0}" th:text="${requestSize}"></span>
-</a>
+<div>
+    <th:block th:if="${draftTimePingId != null and requestSize > 0}">
+        <a th:href="@{/ping-time/{id}(id=${draftTimePingId})}" class="request-icon">
+            <img th:src="${requestIconUrl}" onerror="this.src='images/placeholder_85x89.png'">
+            <span class="request-badge" th:text="${requestSize}"></span>
+        </a>
+    </th:block>
+</div>
+
 
 </body>
 </html>

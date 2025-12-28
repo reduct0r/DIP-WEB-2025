@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/styles-card-view.css">
+    <link rel="stylesheet" href="/details-styles.css">
     <title th:text="${component.title} + ' - PINGTEST'">PINGTEST</title>
 </head>
 <body>
 <div class="page-wrapper">
     <div class="header-main">
         <a th:href="@{/}" class="logo-group">
-            <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'icon.png'" alt="icon" onerror="this.src='/images/icon.png'">
+            <img th:src="${iconUrl}" alt="icon" onerror="this.src='/images/icon.png'">
             <span class="logo-title">PINGTEST</span>
         </a>
     </div>
@@ -21,14 +21,30 @@
             <p class="description" th:text="${component.longDescription}">Описание</p>
         </div>
         <div class="image-holder">
-            <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + ${component.image}" alt="icon" onerror="this.src='/images/placeholder_142x142.png'">
+            <img th:src="${component.imageUrl}" alt="icon" onerror="this.src='/images/placeholder_142x142.png'">
             <div class="time-holder">
                 <div class="time-component">
-                    <img src="images/placeholder_142x142.png" th:src="${minioBaseUrl} + 'ping_icon.svg'" alt="ping icon" onerror="this.src='/images/placeholder_55x55.png'">
+                    <img th:src="${pingIconUrl}" alt="ping icon" onerror="this.src='/images/placeholder_55x55.png'">
                     <span th:text="${component.time} + ' мс'">10 мс</span>
                 </div>
             </div>
         </div>
+    </div>
+    <div class="add-to-cart">
+        <form th:action="@{/server-component/{id}/update-group(id=${component.id})}" method="post">
+            <label>Выберите БД/Кэш:</label>
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" name="bd" value="true" th:checked="${isBdChecked}">
+                    БД
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" name="cache" value="true" th:checked="${isCacheChecked}">
+                    Кэш
+                </label>
+            </div>
+            <button type="submit">Применить</button>
+        </form>
     </div>
     <p class="upper-footer"></p>
 </div>

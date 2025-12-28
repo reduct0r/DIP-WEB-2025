@@ -1,6 +1,5 @@
 # устанавливаем версию в соотвествии с необходимой нам
 # подробнее на https://docs.docker.com/compose/compose-file/compose-versioning/
-version: '3.7'
 
 # настройки и конфигурации, общие для всех контейнеров
 x-minio-common: &minio-common
@@ -75,6 +74,72 @@ services:
       - minio3
       - minio4
 
+  postgres:
+    image: postgres:15
+    container_name: postgres_lab
+    restart: always
+    environment:
+      POSTGRES_USER: labuser
+      POSTGRES_PASSWORD: labpass
+      POSTGRES_DB: labdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Добавление сервиса Adminer
+  adminer:
+    image: adminer:latest
+    container_name: adminer_lab
+    restart: always
+    ports:
+      - "8082:8080"
+    depends_on:
+      - postgres
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres_lab
+      ADMINER_DESIGN: galkaev
+
+  # Добавление сервиса Redis
+  redis:
+    image: redis:8.0.3
+    container_name: redis_lab
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server --save 20 1 --loglevel warning --requirepass yourpassword
+    volumes:
+      - redis_data:/data
+
+  # Добавление сервиса Redis Insight для UI просмотра Redis
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis_insight_lab
+    restart: always
+    ports:
+      - "5540:5540"
+    volumes:
+      - redis_insight_data:/data
+    environment:
+      - RI_APP_PORT=5540
+      - RI_APP_HOST=0.0.0.0
+      - RI_STDOUT_LOGGER=true
+      - RI_FILES_LOGGER=true
+      - RI_LOG_LEVEL=info
+    depends_on:
+      - redis
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis_commander_lab
+    restart: always
+    ports:
+      - "8083:8081"
+    environment:
+      - REDIS_HOSTS=local:redis_lab:6379:0:yourpassword
+    depends_on:
+      - redis
+
 ## По умолчанию в этой конфигурации используется локальный драйвер docker по умолчанию,
 ## Для пользовательских томов замените на конфигурацию драйвера тома.
 volumes:
@@ -86,3 +151,6 @@ volumes:
   data3-2:
   data4-1:
   data4-2:
+  postgres_data:  # volume для PostgreSQL данных
+  redis_data:  # volume для Redis данных
+  redis_insight_data:  # volume для Redis Insight данных

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <link rel="stylesheet" href="/ping-time-styles.css">
+</head>
+<body>
+<div th:fragment="ping-time-component(item)" class="tile-container" th:if="${item != null and item.component != null}">
+    <!-- Поля услуги -->
+    <img th:src="${item.component.imageUrl}" alt="component icon" class="icon" onerror="this.src='/images/placeholder_111x111.png'">
+    <p class="title" th:text="${item.component.title ?: 'Неизвестно'}">База данных</p>
+    <p class="description" th:text="${item.component.description ?: 'Нет описания'}">Хранение данных: SQL-запросы, чтение/запись в диск. Время доступа обусловливает при больших объемах.</p> <!-- Короткое description -->
+    <!-- m-m поля-->
+    <div class="time">
+        <img th:src="${pingIconUrl}" alt="icon" onerror="this.src='/images/placeholder_23x23.png'">
+        <span th:text="${item.component.time} + ' мс'">10 мс</span>
+    </div>
+    <div class="mm-fields">
+        <!-- Количество -->
+        <div class="quantity">
+            Кол-во
+            <input type="number" th:value="${item.quantity}" class="mini-input">
+        </div>
+    </div>
+</div>
+</body>
+</html>

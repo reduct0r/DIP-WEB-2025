@@ -143,6 +143,36 @@ body, html {
     border-radius: 5px;
     padding: 5px;
     font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.dark-select:hover {
+    border-color: #881af0;
+}
+
+.dark-select option {
+    background-color: #05061F;
+    color: #ffffff;
+}
+
+.dark-select option[value="LOW"] {
+    background-color: #228B22;
+    color: #ffffff;
+}
+
+.dark-select option[value="MEDIUM"] {
+    background-color: #FFD700;
+    color: #000000;
+}
+
+.dark-select option[value="HIGH"] {
+    background-color: #FF4500;
+    color: #ffffff;
+}
+
+.dark-select option[value="EXTREME"] {
+    background-color: #8B0000;
+    color: #ffffff;
 }
 
 .quantity {
@@ -230,7 +260,7 @@ body, html {
     flex-direction: row;
     background-color: #05061F;
     height: auto;
-    justify-content: left;
+    justify-content: flex-end;
     align-items: flex-start;
     width: 100%;
 }
@@ -313,4 +343,78 @@ body, html {
 
 .calculate-button:hover::before {
     border-color: #881af0;
+}
+
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.button-content-container {
+    background-color: #b01515;
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-family: 'Roboto Mono', monospace;
+    cursor: pointer;
+    border-radius: 30px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background-color 0.3s ease, transform 0.3s ease;;
+}
+
+.button-content-container:hover {
+    background-color: #7f0e0e;
+}
+
+.button-content-container img {
+    width: 25px;
+    height: 25px;
+}
+
+.load-level-selector {
+    background-color: #1A1B2E;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 10px;
+    margin-left: 20px;
+    margin-bottom: 10px;
+    width: max-content;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    border: 1px solid #121324;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.load-level-selector label {
+    margin: 0;
+    font-weight: normal;
+    white-space: nowrap;
+}
+
+.dark-input {
+    background-color: #05061F;
+    color: #ffffff;
+    border: 1px solid #1CBFFF;
+    border-radius: 5px;
+    padding: 5px;
+    font-size: 14px;
+    width: 60px;
+    text-align: center;
+    transition: border-color 0.3s ease;
+}
+
+.dark-input:hover,
+.dark-input:focus {
+    border-color: #881af0;
+}
+
+.dark-input::placeholder {
+    color: #9193A8;
 }

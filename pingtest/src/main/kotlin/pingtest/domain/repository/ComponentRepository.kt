@@ -1,11 +1,11 @@
-package pingtest.domain.repository
+package com.dip.pingtest.domain.repository
 
-import com.dip.pingtest.domain.model.Component
-import com.dip.pingtest.domain.model.Request
+import com.dip.pingtest.domain.model.ServerComponent
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
 
-interface ComponentRepository {
-    fun getComponent(id: Int): Component?
-    fun getRequestItemCount(id: Int): Int
-    fun getRequest(id: Int): Request?
-    fun getComponents(filter: String? = null): List<Component>
+@Repository
+interface ComponentRepository : JpaRepository<ServerComponent, Int> {
+    fun findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(filter: String, filter2: String): List<ServerComponent>
+    fun findByTitle(title: String): ServerComponent?
 }

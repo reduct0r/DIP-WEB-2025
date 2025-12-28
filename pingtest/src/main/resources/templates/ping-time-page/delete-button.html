@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <link rel="stylesheet" href="/ping-time-styles.css">
+</head>
+<body>
+<div th:fragment="delete-button(pingTimeId)" class="button-container">
+    <form th:action="@{/ping-time/delete/{id}(id=${pingTimeId})}" method="post">
+        <button type="submit" class="button-content-container">
+            <img th:src="${deleteIconUrl}" alt="delete" onerror="this.src='/images/placeholder_25x25.png'">
+            Удалить
+        </button>
+    </form>
+</div>
+</body>
+</html>
