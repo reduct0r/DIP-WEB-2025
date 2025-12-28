@@ -144,10 +144,49 @@ class DatabaseInitializer(
                 }
             }
             
+            // Синхронизируем последовательность ID после вставки компонентов
+            syncSequence()
+            
             println("Услуги успешно добавлены в базу данных.")
         } catch (e: Exception) {
             println("Ошибка при добавлении услуг: ${e.message}")
             e.printStackTrace()
+        }
+    }
+    
+    private fun syncSequence() {
+        try {
+            println("Синхронизация последовательности ID для server_components...")
+            // Используем тот же подход, что и в ComponentService
+            entityManager.createNativeQuery(
+                """
+                DO $$
+                DECLARE
+                    max_id INTEGER;
+                    seq_name TEXT;
+                BEGIN
+                    SELECT COALESCE(MAX(id), 0) INTO max_id FROM server_components;
+                    SELECT pg_get_serial_sequence('server_components', 'id') INTO seq_name;
+                    
+                    IF seq_name IS NOT NULL THEN
+                        PERFORM setval(seq_name, max_id, true);
+                    END IF;
+                END $$;
+                """
+            ).executeUpdate()
+            println("Последовательность ID синхронизирована.")
+        } catch (e: Exception) {
+            println("Ошибка при синхронизации последовательности: ${e.message}")
+            e.printStackTrace()
+            // Пытаемся альтернативный способ
+            try {
+                entityManager.createNativeQuery(
+                    "SELECT setval('server_components_id_seq', (SELECT COALESCE(MAX(id), 1) FROM server_components), true)"
+                ).executeUpdate()
+                println("Альтернативная синхронизация выполнена успешно.")
+            } catch (e2: Exception) {
+                println("Альтернативная синхронизация также не удалась: ${e2.message}")
+            }
         }
     }
     

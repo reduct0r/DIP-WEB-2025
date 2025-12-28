@@ -11,7 +11,11 @@ import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import io.minio.RemoveObjectArgs
 import io.minio.http.Method
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.util.NoSuchElementException
 import java.util.UUID
@@ -23,6 +27,8 @@ class ComponentService(
     private val minioProperties: MinioProperties,
     private val userRepository: UserRepository
 ) {
+    @PersistenceContext
+    private lateinit var entityManager: EntityManager
     fun getComponentsAsDomain(filter: String?): List<ServerComponent> {
         val components = if (filter.isNullOrBlank()) {
             componentRepository.findAll().filter { it.status == ServerComponentStatus.ACTIVE }
@@ -30,13 +36,13 @@ class ComponentService(
             componentRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(filter, filter)
                 .filter { it.status == ServerComponentStatus.ACTIVE }
         }
-        components.forEach { it.imageUrl = generatePresignedUrl(it.image) }
+        components.forEach { component -> component.imageUrl = generatePresignedUrl(component.image) }
         return components
     }
     fun getComponentAsDomain(id: Int): ServerComponent? {
-        val component = componentRepository.findById(id).orElse(null)
-        if (component?.status != ServerComponentStatus.ACTIVE) return null
-        component?.imageUrl = generatePresignedUrl(component.image)
+        val component = componentRepository.findById(id).orElse(null) ?: return null
+        if (component.status != ServerComponentStatus.ACTIVE) return null
+        component.imageUrl = generatePresignedUrl(component.image)
         return component
     }
     fun getComponents(filter: String?): List<ComponentDTO> {
@@ -53,7 +59,13 @@ class ComponentService(
         if (component.status != ServerComponentStatus.ACTIVE) throw RuntimeException("Серверный компонент удален")
         return toDTO(component)
     }
+    @Transactional
     fun createComponent(dto: ComponentDTO): ComponentDTO {
+        if (!isCurrentUserModerator()) {
+            throw RuntimeException("Access denied: Only moderators can create components")
+        }
+        // Синхронизируем последовательность ID перед созданием (в той же транзакции)
+        syncSequence()
         val component = ServerComponent(
             title = dto.title,
             description = dto.description,
@@ -64,6 +76,9 @@ class ComponentService(
         return toDTO(saved)
     }
     fun updateComponent(id: Int, dto: ComponentDTO): ComponentDTO {
+        if (!isCurrentUserModerator()) {
+            throw RuntimeException("Access denied: Only moderators can update components")
+        }
         val component = componentRepository.findById(id).orElseThrow { NoSuchElementException("Component not found") }
         if (component.status != ServerComponentStatus.ACTIVE) throw RuntimeException("Component deleted")
         component.title = dto.title
@@ -74,12 +89,18 @@ class ComponentService(
         return toDTO(saved)
     }
     fun deleteComponent(id: Int) {
+        if (!isCurrentUserModerator()) {
+            throw RuntimeException("Access denied: Only moderators can delete components")
+        }
         val component = componentRepository.findById(id).orElseThrow { NoSuchElementException("Component not found") }
         component.image?.let { removeFromMinio(it) }
         component.status = ServerComponentStatus.DELETED
         componentRepository.save(component)
     }
     fun uploadImage(id: Int, file: MultipartFile): String {
+        if (!isCurrentUserModerator()) {
+            throw RuntimeException("Access denied: Only moderators can upload component images")
+        }
         val component = componentRepository.findById(id).orElseThrow { NoSuchElementException("Component not found") }
         if (component.status != ServerComponentStatus.ACTIVE) throw RuntimeException("Component deleted")
         val extension = file.originalFilename?.substringAfterLast(".") ?: "jpg"
@@ -138,5 +159,50 @@ class ComponentService(
         }
         user.preferences = prefs.entries.joinToString(";") { "${it.key}:${it.value}" }
         userRepository.save(user)
+    }
+
+    private fun getCurrentUserId(): Int {
+        val auth = SecurityContextHolder.getContext().authentication
+        return auth.principal as Int
+    }
+
+    private fun isCurrentUserModerator(): Boolean {
+        val userId = getCurrentUserId()
+        val user = userRepository.findById(userId).orElse(null)
+        return user?.isModerator ?: false
+    }
+
+    private fun syncSequence() {
+        try {
+            // Используем простой и надежный способ синхронизации последовательности
+            entityManager.createNativeQuery(
+                """
+                DO $$
+                DECLARE
+                    max_id INTEGER;
+                    seq_name TEXT;
+                BEGIN
+                    SELECT COALESCE(MAX(id), 0) INTO max_id FROM server_components;
+                    SELECT pg_get_serial_sequence('server_components', 'id') INTO seq_name;
+                    
+                    IF seq_name IS NOT NULL THEN
+                        PERFORM setval(seq_name, max_id, true);
+                    END IF;
+                END $$;
+                """
+            ).executeUpdate()
+        } catch (e: Exception) {
+            // Логируем ошибку для диагностики
+            println("Ошибка синхронизации последовательности: ${e.message}")
+            e.printStackTrace()
+            // Пытаемся альтернативный способ
+            try {
+                entityManager.createNativeQuery(
+                    "SELECT setval('server_components_id_seq', (SELECT COALESCE(MAX(id), 1) FROM server_components), true)"
+                ).executeUpdate()
+            } catch (e2: Exception) {
+                println("Альтернативная синхронизация также не удалась: ${e2.message}")
+            }
+        }
     }
 }
