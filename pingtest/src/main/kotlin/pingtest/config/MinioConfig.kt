@@ -24,5 +24,7 @@ data class MinioProperties(
     val url: String,
     val accessKey: String,
     val secretKey: String,
-    val bucket: String
+    val bucket: String,
+    val externalUrl: String,
+    val externalLocalhostUrl: String
 )

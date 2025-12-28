@@ -23,12 +23,13 @@ import java.util.UUID
 @Service
 class ComponentService(
     private val componentRepository: ComponentRepository,
-    private val minioClient: MinioClient,
+    private val minioClient: MinioClient,  // Основной клиент для внутренних операций
     private val minioProperties: MinioProperties,
     private val userRepository: UserRepository
 ) {
     @PersistenceContext
     private lateinit var entityManager: EntityManager
+
     fun getComponentsAsDomain(filter: String?): List<ServerComponent> {
         val components = if (filter.isNullOrBlank()) {
             componentRepository.findAll().filter { it.status == ServerComponentStatus.ACTIVE }
@@ -39,12 +40,14 @@ class ComponentService(
         components.forEach { component -> component.imageUrl = generatePresignedUrl(component.image) }
         return components
     }
+
     fun getComponentAsDomain(id: Int): ServerComponent? {
         val component = componentRepository.findById(id).orElse(null) ?: return null
         if (component.status != ServerComponentStatus.ACTIVE) return null
         component.imageUrl = generatePresignedUrl(component.image)
         return component
     }
+
     fun getComponents(filter: String?): List<ComponentDTO> {
         val components = if (filter.isNullOrBlank()) {
             componentRepository.findAll().filter { it.status == ServerComponentStatus.ACTIVE }
@@ -54,11 +57,13 @@ class ComponentService(
         }
         return components.map { toDTO(it) }
     }
+
     fun getComponent(id: Int): ComponentDTO {
         val component = componentRepository.findById(id).orElseThrow { NoSuchElementException("Component not found") }
         if (component.status != ServerComponentStatus.ACTIVE) throw RuntimeException("Серверный компонент удален")
         return toDTO(component)
     }
+
     @Transactional
     fun createComponent(dto: ComponentDTO): ComponentDTO {
         if (!isCurrentUserModerator()) {
@@ -75,6 +80,7 @@ class ComponentService(
         val saved = componentRepository.save(component)
         return toDTO(saved)
     }
+
     fun updateComponent(id: Int, dto: ComponentDTO): ComponentDTO {
         if (!isCurrentUserModerator()) {
             throw RuntimeException("Access denied: Only moderators can update components")
@@ -88,6 +94,7 @@ class ComponentService(
         val saved = componentRepository.save(component)
         return toDTO(saved)
     }
+
     fun deleteComponent(id: Int) {
         if (!isCurrentUserModerator()) {
             throw RuntimeException("Access denied: Only moderators can delete components")
@@ -97,6 +104,7 @@ class ComponentService(
         component.status = ServerComponentStatus.DELETED
         componentRepository.save(component)
     }
+
     fun uploadImage(id: Int, file: MultipartFile): String {
         if (!isCurrentUserModerator()) {
             throw RuntimeException("Access denied: Only moderators can upload component images")
@@ -118,26 +126,40 @@ class ComponentService(
         componentRepository.save(component)
         return generatePresignedUrl(objectName) ?: throw RuntimeException("Failed to generate URL")
     }
-    fun generatePresignedUrl(imageName: String?): String? {
+
+    fun generatePresignedUrl(imageName: String?, useIp: Boolean = false): String? {
         if (imageName == null) return null
-        return minioClient.getPresignedObjectUrl(
+
+        // Выбираем URL в зависимости от параметра: IP для Android, localhost для браузера
+        val endpointUrl = if (useIp) minioProperties.externalUrl else minioProperties.externalLocalhostUrl
+
+        // Создаем отдельный клиент с ВНЕШНИМ URL для генерации presigned URL
+        val externalMinioClient = MinioClient.builder()
+            .endpoint(endpointUrl)
+            .credentials(minioProperties.accessKey, minioProperties.secretKey)
+            .build()
+
+        return externalMinioClient.getPresignedObjectUrl(
             GetPresignedObjectUrlArgs.builder()
                 .method(Method.GET)
                 .bucket(minioProperties.bucket)
                 .`object`(imageName)
-                .expiry(60 * 60 * 24) // 24 hours
+                .expiry(60 * 60 * 24) // 24 часа
                 .build()
         )
     }
+
     private fun removeFromMinio(objectName: String) {
         minioClient.removeObject(
             RemoveObjectArgs.builder().bucket(minioProperties.bucket).`object`(objectName).build()
         )
     }
+
     private fun toDTO(component: ServerComponent): ComponentDTO = ComponentDTO(
         component.id, component.title, component.description, component.longDescription,
         component.time, generatePresignedUrl(component.image)
     )
+
     fun getPreference(userId: Int, componentId: Int): String? {
         val user = userRepository.findById(userId).orElseThrow { NoSuchElementException("User not found") }
         val prefs = (user.preferences ?: "").split(";").filter { it.isNotBlank() }.associate {
@@ -146,6 +168,7 @@ class ComponentService(
         }
         return prefs[componentId.toString()]
     }
+
     fun updatePreference(userId: Int, componentId: Int, group: String?) {
         val user = userRepository.findById(userId).orElseThrow { NoSuchElementException("User not found") }
         val prefs = (user.preferences ?: "").split(";").filter { it.isNotBlank() }.associateTo(mutableMapOf()) {
