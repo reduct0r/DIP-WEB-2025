@@ -8,12 +8,20 @@ import com.dip.pingtest.domain.repository.PingTimeRepository
 import com.dip.pingtest.domain.repository.UserRepository
 import com.dip.pingtest.infrastructure.dto.TimePingIconDTO
 import com.dip.pingtest.infrastructure.dto.ItemUpdateDTO
+import com.dip.pingtest.infrastructure.dto.PaginatedResponseDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeItemDTO
 import com.dip.pingtest.infrastructure.dto.PingTimeUpdateDTO
+import com.dip.pingtest.config.IndexConfig
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
 import org.springframework.web.client.RestTemplate
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -31,8 +39,11 @@ class PingTimeService(
     private val componentRepository: ComponentRepository,
     private val userRepository: UserRepository,
     private val componentService: ComponentService,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
+    private val indexConfig: IndexConfig
 ) {
+    @PersistenceContext
+    private lateinit var entityManager: EntityManager
     private val restTemplate: RestTemplate = RestTemplate().apply {
         messageConverters.add(StringHttpMessageConverter(StandardCharsets.UTF_8))
         messageConverters.add(MappingJackson2HttpMessageConverter())
@@ -48,6 +59,12 @@ class PingTimeService(
         val auth = SecurityContextHolder.getContext().authentication
         val authority = auth.authorities.first().authority
         return Role.valueOf(authority.replace("ROLE_", ""))
+    }
+    
+    private fun isCurrentUserModerator(): Boolean {
+        val userId = getCurrentUserId()
+        val user = userRepository.findById(userId).orElse(null)
+        return user?.isModerator ?: false
     }
 
     fun getTimePingIcon(): TimePingIconDTO {
@@ -75,16 +92,187 @@ class PingTimeService(
             val enumStatus = PingTimeStatus.valueOf(s.uppercase())
             pingTimes = pingTimes.filter { it.status == enumStatus }
         }
-        if (getCurrentRole() == Role.USER) {
+        if (!isCurrentUserModerator()) {
             pingTimes = pingTimes.filter { it.creator.id == getCurrentUserId() }
         }
         return pingTimes.map { toDTO(it) }
     }
 
+    fun getTimePingsPaginated(
+        status: String?,
+        fromDate: String?,
+        toDate: String?,
+        page: Int,
+        size: Int,
+        sortBy: String = "formationDate",
+        sortDir: String = "DESC"
+    ): PaginatedResponseDTO<PingTimeDTO> {
+        val startTime = System.currentTimeMillis()
+        
+        // Управление использованием индекса через конфигурацию
+        try {
+            if (!indexConfig.enabled) {
+                // Временно отключаем использование индексов для этого запроса
+                entityManager.createNativeQuery("SET LOCAL enable_indexscan = off").executeUpdate()
+                entityManager.createNativeQuery("SET LOCAL enable_bitmapscan = off").executeUpdate()
+            } else {
+                // Включаем использование индексов
+                entityManager.createNativeQuery("SET LOCAL enable_indexscan = on").executeUpdate()
+                entityManager.createNativeQuery("SET LOCAL enable_bitmapscan = on").executeUpdate()
+            }
+        } catch (e: Exception) {
+            // Игнорируем ошибки, если настройка не поддерживается
+            println("Не удалось установить настройки индексов: ${e.message}")
+        }
+        
+        val excludedStatuses = listOf(PingTimeStatus.DELETED, PingTimeStatus.DRAFT)
+        val from = fromDate?.let { LocalDateTime.parse(it) }
+        val to = toDate?.let { LocalDateTime.parse(it) }
+
+        val sort = Sort.by(
+            if (sortDir.uppercase() == "ASC") Sort.Direction.ASC else Sort.Direction.DESC,
+            sortBy
+        )
+        val pageable: Pageable = PageRequest.of(page, size, sort)
+
+        // Определяем статус для фильтрации
+        val statusFilter = status?.let { PingTimeStatus.valueOf(it.uppercase()) }
+        
+        // Получаем заявки с учетом фильтрации по датам и статусу
+        // Используем formationDate, если оно есть, иначе createdAt
+        var pingTimesPage: Page<PingTime> = when {
+            // Без фильтрации по датам - используем методы репозитория для эффективной фильтрации
+            from == null && to == null -> {
+                if (statusFilter != null) {
+                    pingTimeRepository.findAllByStatusNotInAndStatus(excludedStatuses, statusFilter, pageable)
+                } else {
+                    pingTimeRepository.findAllByStatusNotIn(excludedStatuses, pageable)
+                }
+            }
+            // С фильтрацией по датам - используем фильтрацию в памяти для учета COALESCE
+            else -> {
+                // Для фильтрации по датам получаем все записи и фильтруем в памяти
+                // Это позволяет учитывать заявки без formationDate (используем createdAt)
+                val allRequests = if (statusFilter != null) {
+                    pingTimeRepository.findAllByStatusNotIn(excludedStatuses).filter { it.status == statusFilter }
+                } else {
+                    pingTimeRepository.findAllByStatusNotIn(excludedStatuses)
+                }
+                
+                val filteredRequests = allRequests.filter { pingTime ->
+                    val dateToCompare = pingTime.formationDate ?: pingTime.createdAt
+                    when {
+                        from != null && to != null -> {
+                            dateToCompare.isAfter(from.minusNanos(1)) && dateToCompare.isBefore(to.plusDays(1))
+                        }
+                        from != null -> {
+                            dateToCompare.isAfter(from.minusNanos(1)) || dateToCompare.isEqual(from)
+                        }
+                        else -> { // to != null
+                            dateToCompare.isBefore(to!!.plusDays(1)) || dateToCompare.isEqual(to)
+                        }
+                    }
+                }
+                
+                // Применяем сортировку
+                val sortedRequests = when (sortDir.uppercase()) {
+                    "ASC" -> filteredRequests.sortedBy { 
+                        when (sortBy) {
+                            "formationDate" -> it.formationDate ?: it.createdAt
+                            "createdAt" -> it.createdAt
+                            else -> it.formationDate ?: it.createdAt
+                        }
+                    }
+                    else -> filteredRequests.sortedByDescending { 
+                        when (sortBy) {
+                            "formationDate" -> it.formationDate ?: it.createdAt
+                            "createdAt" -> it.createdAt
+                            else -> it.formationDate ?: it.createdAt
+                        }
+                    }
+                }
+                
+                // Применяем пагинацию
+                val total = sortedRequests.size.toLong()
+                val start = page * size
+                val end = minOf(start + size, sortedRequests.size)
+                val paginatedContent = if (start < sortedRequests.size) {
+                    sortedRequests.subList(start, end)
+                } else {
+                    emptyList()
+                }
+                
+                org.springframework.data.domain.PageImpl(paginatedContent, pageable, total)
+            }
+        }
+
+        // Фильтрация по пользователю (только для обычных пользователей, не для модераторов)
+        // Проверяем isModerator из БД, а не role
+        if (!isCurrentUserModerator()) {
+            // Для обычных пользователей показываем только их заявки
+            val filteredContent = pingTimesPage.content.filter { it.creator.id == getCurrentUserId() }
+            // Пересчитываем totalElements для отфильтрованных результатов
+            val allUserRequests = when {
+                from != null && to != null -> {
+                    pingTimeRepository.findAllByStatusNotIn(excludedStatuses).filter { pingTime ->
+                        pingTime.creator.id == getCurrentUserId() &&
+                        (pingTime.formationDate ?: pingTime.createdAt).let { dateToCompare ->
+                            dateToCompare.isAfter(from.minusNanos(1)) && dateToCompare.isBefore(to.plusDays(1))
+                        }
+                    }
+                }
+                from != null -> {
+                    pingTimeRepository.findAllByStatusNotIn(excludedStatuses).filter { pingTime ->
+                        pingTime.creator.id == getCurrentUserId() &&
+                        (pingTime.formationDate ?: pingTime.createdAt).let { dateToCompare ->
+                            dateToCompare.isAfter(from.minusNanos(1)) || dateToCompare.isEqual(from)
+                        }
+                    }
+                }
+                to != null -> {
+                    pingTimeRepository.findAllByStatusNotIn(excludedStatuses).filter { pingTime ->
+                        pingTime.creator.id == getCurrentUserId() &&
+                        (pingTime.formationDate ?: pingTime.createdAt).let { dateToCompare ->
+                            dateToCompare.isBefore(to.plusDays(1)) || dateToCompare.isEqual(to)
+                        }
+                    }
+                }
+                else -> {
+                    pingTimeRepository.findAllByStatusNotIn(excludedStatuses).filter { 
+                        it.creator.id == getCurrentUserId() 
+                    }
+                }
+            }
+            val total = allUserRequests.size.toLong()
+            pingTimesPage = org.springframework.data.domain.PageImpl(
+                filteredContent,
+                pageable,
+                total
+            )
+        }
+        // Для модераторов (isModerator = true) фильтрация по пользователю не применяется - показываем все заявки
+
+        val queryTime = System.currentTimeMillis() - startTime
+        
+        // Выводим время запроса в консоль
+        println("getPingTimesQuery: ${queryTime} мс")
+
+        return PaginatedResponseDTO(
+            content = pingTimesPage.content.map { toDTO(it) },
+            totalElements = pingTimesPage.totalElements,
+            totalPages = pingTimesPage.totalPages,
+            currentPage = pingTimesPage.number,
+            pageSize = pingTimesPage.size,
+            hasNext = pingTimesPage.hasNext(),
+            hasPrevious = pingTimesPage.hasPrevious(),
+            queryTimeMs = queryTime
+        )
+    }
+
     fun getTimePing(id: Int): PingTimeDTO {
         val pingTime = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (pingTime.status == PingTimeStatus.DELETED) throw RuntimeException("Ping Time Request deleted")
-        if (getCurrentRole() == Role.USER && pingTime.creator.id != getCurrentUserId()) {
+        if (!isCurrentUserModerator() && pingTime.creator.id != getCurrentUserId()) {
             throw RuntimeException("Access denied: Not the creator")
         }
         return toDTO(pingTime)
@@ -93,7 +281,7 @@ class PingTimeService(
     fun getTimePingDomain(id: Int): PingTime? {
         val pingTime = pingTimeRepository.findById(id).orElse(null)
         if (pingTime != null) {
-            if (getCurrentRole() == Role.USER && pingTime.creator.id != getCurrentUserId()) {
+            if (!isCurrentUserModerator() && pingTime.creator.id != getCurrentUserId()) {
                 throw RuntimeException("Access denied: Not the creator")
             }
             pingTime.items.forEach { it.component.imageUrl = componentService.generatePresignedUrl(it.component.image) }
@@ -122,6 +310,10 @@ class PingTimeService(
     }
 
     fun moderateTimePing(id: Int, action: String): PingTimeDTO {
+        // Проверяем, является ли пользователь модератором через isModerator из БД
+        if (!isCurrentUserModerator()) {
+            throw RuntimeException("Access denied: Only moderators can moderate requests")
+        }
         val request = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (request.status != PingTimeStatus.FORMED) throw RuntimeException("Only formed can be moderated")
         request.completionDate = LocalDateTime.now()
@@ -134,22 +326,16 @@ class PingTimeService(
                 val multiplier = request.loadCoefficient ?: 1
                 val calculatedTotalTime = baseTime * multiplier
                 
-                println("Завершение заявки ID=${request.id}: baseTime=$baseTime, multiplier=$multiplier, calculatedTotalTime=$calculatedTotalTime")
-                
                 // Обнуляем totalTime - оно будет заполнено асинхронным сервисом
                 request.totalTime = null
                 request.status = PingTimeStatus.COMPLETED
                 val saved = pingTimeRepository.save(request)
                 
-                println("Сохранена заявка с totalTime=${saved.totalTime}")
-                
                 // Вызываем асинхронный сервис для расчета оптимизированного времени
                 // Передаем рассчитанное время, но не сохраняем его в БД
                 callAsyncService(saved, calculatedTotalTime)
                 
-                val dto = toDTO(saved)
-                println("Возвращаемый DTO totalTime=${dto.totalTime}")
-                return dto
+                return toDTO(saved)
             }
             "REJECT" -> {
                 request.status = PingTimeStatus.REJECTED
@@ -162,37 +348,32 @@ class PingTimeService(
     
     private fun callAsyncService(pingTime: PingTime, calculatedTotalTime: Int) {
         try {
-            // Формируем данные для отправки в асинхронный сервис
-            // Отправляем рассчитанное время заявки для расчета оптимизированного значения
+            // Копируем значения в локальные переменные для использования в Thread
+            val requestId = pingTime.id
             val payload = mapOf(
-                "request_id" to pingTime.id,
+                "request_id" to requestId,
                 "totalTime" to calculatedTotalTime
             )
             
             // Отправляем запрос асинхронно (без ожидания ответа)
             Thread {
                 try {
-                    println("Вызов асинхронного сервиса: request_id=${pingTime.id}, totalTime=$calculatedTotalTime")
-                    println("Payload: $payload")
-                    
                     // Сериализуем payload в JSON строку
                     val jsonPayload = objectMapper.writeValueAsString(payload)
-                    println("JSON payload: $jsonPayload")
                     
                     val headers = HttpHeaders()
                     headers.contentType = MediaType.APPLICATION_JSON
                     val httpRequest = HttpEntity(jsonPayload, headers)
                     
-                    println("Отправка запроса на: $asyncServiceUrl")
-                    val response = restTemplate.postForObject(asyncServiceUrl, httpRequest, Map::class.java)
-                    println("Ответ от асинхронного сервиса: $response")
+                    restTemplate.postForObject(asyncServiceUrl, httpRequest, Map::class.java)
                 } catch (e: Exception) {
-                    println("Ошибка при вызове асинхронного сервиса: ${e.message}")
+                    // Логируем ошибки асинхронного сервиса
                     e.printStackTrace()
                 }
             }.start()
         } catch (e: Exception) {
-            println("Ошибка при подготовке запроса к асинхронному сервису: ${e.message}")
+            // Логируем ошибки при подготовке запроса
+            e.printStackTrace()
         }
     }
     
@@ -291,7 +472,7 @@ class PingTimeService(
 
     fun updateTimePing(id: Int, dto: PingTimeUpdateDTO): PingTimeDTO {
         val pingTime = pingTimeRepository.findById(id).orElseThrow { RuntimeException("PingTime not found") }
-        if (pingTime.creator.id != getCurrentUserId() && getCurrentRole() != Role.MODERATOR) {
+        if (pingTime.creator.id != getCurrentUserId() && !isCurrentUserModerator()) {
             throw RuntimeException("Access denied")
         }
         dto.loadCoefficient?.let {
@@ -340,7 +521,6 @@ class PingTimeService(
             items = items,
             loadCoefficient = request.loadCoefficient
         )
-        println("toDTO: request.totalTime=${request.totalTime}, dto.totalTime=${dto.totalTime}")
         return dto
     }
 }

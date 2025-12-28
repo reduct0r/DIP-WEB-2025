@@ -18,5 +18,7 @@ data class User(
     var password: String,
     @Enumerated(EnumType.STRING)
     var role: Role = Role.USER,
+    @jakarta.persistence.Column(name = "is_moderator")
+    var isModerator: Boolean = false,
     var preferences: String? = null
 )

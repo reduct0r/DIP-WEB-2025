@@ -1,5 +1,6 @@
 package com.dip.pingtest.controller
 
+import com.dip.pingtest.infrastructure.dto.PaginatedResponseDTO
 import com.dip.pingtest.infrastructure.dto.TimePingIconDTO
 import com.dip.pingtest.infrastructure.dto.ItemUpdateDTO
 import com.dip.pingtest.infrastructure.dto.ModerateActionDTO
@@ -30,13 +31,23 @@ class PingTimeController(private val service: PingTimeService) {
     fun getTimePingIcon(): TimePingIconDTO = service.getTimePingIcon()
 
     @GetMapping
-    @Operation(summary = "Получить все запросы времени пинга", description = "Возвращает список запросов времени пинга с опциональными фильтрами по статусу и диапазону дат")
+    @Operation(summary = "Получить все запросы времени пинга", description = "Возвращает список запросов времени пинга с опциональными фильтрами по статусу и диапазону дат. Поддерживает пагинацию.")
     @SecurityRequirement(name = "bearerAuth")
     fun getAll(
         @RequestParam(required = false) status: String?,
         @RequestParam(required = false) fromDate: String?,
-        @RequestParam(required = false) toDate: String?
-    ): List<PingTimeDTO> = service.getTimePings(status, fromDate, toDate)
+        @RequestParam(required = false) toDate: String?,
+        @RequestParam(required = false) page: Int?,
+        @RequestParam(required = false) size: Int?,
+        @RequestParam(defaultValue = "formationDate") sortBy: String,
+        @RequestParam(defaultValue = "DESC") sortDir: String
+    ): Any {
+        return if (page != null && size != null) {
+            service.getTimePingsPaginated(status, fromDate, toDate, page, size, sortBy, sortDir)
+        } else {
+            service.getTimePings(status, fromDate, toDate)
+        }
+    }
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить один запрос времени пинга по ID", description = "Возвращает детали конкретного запроса времени пинга")

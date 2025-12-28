@@ -29,14 +29,14 @@ class UserService(
         if (userRepository.findByUsername(dto.username) != null) {
             throw RuntimeException("Username already exists")
         }
-        val user = User(username = dto.username, password = passwordEncoder.encode(dto.password), role = Role.USER)
+        val user = User(username = dto.username, password = passwordEncoder.encode(dto.password), role = Role.USER, isModerator = false)
         val saved = userRepository.save(user)
-        return UserDTO(saved.id, saved.username, saved.role == Role.MODERATOR)
+        return UserDTO(saved.id, saved.username, saved.isModerator)
     }
 
     fun getUser(userId: Int): UserDTO {
         val user = userRepository.findById(userId).orElseThrow { NoSuchElementException("User not found") }
-        return UserDTO(user.id, user.username, user.role == Role.MODERATOR)
+        return UserDTO(user.id, user.username, user.isModerator)
     }
 
     fun updateUser(userId: Int, dto: UserUpdateDTO): UserDTO {
@@ -44,7 +44,7 @@ class UserService(
         dto.username?.let { user.username = it }
         dto.password?.let { user.password = passwordEncoder.encode(it) }
         val saved = userRepository.save(user)
-        return UserDTO(saved.id, saved.username, saved.role == Role.MODERATOR)
+        return UserDTO(saved.id, saved.username, saved.isModerator)
     }
 
     fun authenticate(dto: LoginDTO, request: HttpServletRequest, response: HttpServletResponse): Map<String, String> {
