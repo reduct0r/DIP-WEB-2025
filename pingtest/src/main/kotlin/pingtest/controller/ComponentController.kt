@@ -18,11 +18,17 @@ class ComponentController(private val service: ComponentService, private val pin
 
     @GetMapping
     @Operation(summary = "Получить все компоненты", description = "Возвращает список компонентов с опциональным фильтром")
-    fun getAll(@RequestParam(required = false) filter: String?): List<ComponentDTO> = service.getComponents(filter)
+    fun getAll(
+        @RequestParam(required = false) filter: String?,
+        @RequestParam(required = false) android: Boolean?
+    ): List<ComponentDTO> = service.getComponents(filter, android == true)
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить один компонент по ID")
-    fun getOne(@PathVariable id: Int): ComponentDTO = service.getComponent(id)
+    fun getOne(
+        @PathVariable id: Int,
+        @RequestParam(required = false) android: Boolean?
+    ): ComponentDTO = service.getComponent(id, android == true)
 
     @PostMapping
     @Operation(summary = "Создать новый компонент")

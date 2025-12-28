@@ -76,7 +76,7 @@ class PingTimeService(
         return TimePingIconDTO(draft?.id ?: -1, draft?.items?.size ?: 0)
     }
 
-    fun getTimePings(status: String?, fromDate: String?, toDate: String?): List<PingTimeDTO> {
+    fun getTimePings(status: String?, fromDate: String?, toDate: String?, useIp: Boolean = false): List<PingTimeDTO> {
         val excludedStatuses = listOf(PingTimeStatus.DELETED, PingTimeStatus.DRAFT)
         val from = fromDate?.let { LocalDateTime.parse(it) }
         val to = toDate?.let { LocalDateTime.parse(it) }
@@ -95,7 +95,7 @@ class PingTimeService(
         if (!isCurrentUserModerator()) {
             pingTimes = pingTimes.filter { it.creator.id == getCurrentUserId() }
         }
-        return pingTimes.map { toDTO(it) }
+        return pingTimes.map { toDTO(it, useIp) }
     }
 
     fun getTimePingsPaginated(
@@ -105,7 +105,8 @@ class PingTimeService(
         page: Int,
         size: Int,
         sortBy: String = "formationDate",
-        sortDir: String = "DESC"
+        sortDir: String = "DESC",
+        useIp: Boolean = false
     ): PaginatedResponseDTO<PingTimeDTO> {
         val startTime = System.currentTimeMillis()
         
@@ -367,7 +368,7 @@ class PingTimeService(
         }
 
         return PaginatedResponseDTO(
-            content = pingTimesPage.content.map { toDTO(it) },
+            content = pingTimesPage.content.map { toDTO(it, useIp) },
             totalElements = pingTimesPage.totalElements,
             totalPages = pingTimesPage.totalPages,
             currentPage = pingTimesPage.number,
@@ -378,22 +379,22 @@ class PingTimeService(
         )
     }
 
-    fun getTimePing(id: Int): PingTimeDTO {
+    fun getTimePing(id: Int, useIp: Boolean = false): PingTimeDTO {
         val pingTime = pingTimeRepository.findById(id).orElseThrow { RuntimeException("Ping Time Request not found") }
         if (pingTime.status == PingTimeStatus.DELETED) throw RuntimeException("Ping Time Request deleted")
         if (!isCurrentUserModerator() && pingTime.creator.id != getCurrentUserId()) {
             throw RuntimeException("Access denied: Not the creator")
         }
-        return toDTO(pingTime)
+        return toDTO(pingTime, useIp)
     }
 
-    fun getTimePingDomain(id: Int): PingTime? {
+    fun getTimePingDomain(id: Int, useIp: Boolean = false): PingTime? {
         val pingTime = pingTimeRepository.findById(id).orElse(null)
         if (pingTime != null) {
             if (!isCurrentUserModerator() && pingTime.creator.id != getCurrentUserId()) {
                 throw RuntimeException("Access denied: Not the creator")
             }
-            pingTime.items.forEach { it.component.imageUrl = componentService.generatePresignedUrl(it.component.image) }
+            pingTime.items.forEach { it.component.imageUrl = componentService.generatePresignedUrl(it.component.image, useIp) }
         }
         return pingTime
     }
@@ -605,14 +606,14 @@ class PingTimeService(
         // Он будет null до завершения модератором
     }
 
-    private fun toDTO(request: PingTime): PingTimeDTO {
+    private fun toDTO(request: PingTime, useIp: Boolean = false): PingTimeDTO {
         val items = request.items.map {
             PingTimeItemDTO(
                 componentId = it.component.id,
                 title = it.component.title,
                 description = it.component.description,
                 time = it.component.time,
-                imageUrl = componentService.generatePresignedUrl(it.component.image),
+                imageUrl = componentService.generatePresignedUrl(it.component.image, useIp),
                 quantity = it.quantity,
                 subtotalTime = calculateSubtotal(it.component, it.quantity, request.creator.id, it.component.id)
             )

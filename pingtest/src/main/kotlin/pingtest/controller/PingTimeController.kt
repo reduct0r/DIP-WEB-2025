@@ -40,19 +40,24 @@ class PingTimeController(private val service: PingTimeService) {
         @RequestParam(required = false) page: Int?,
         @RequestParam(required = false) size: Int?,
         @RequestParam(defaultValue = "formationDate") sortBy: String,
-        @RequestParam(defaultValue = "DESC") sortDir: String
+        @RequestParam(defaultValue = "DESC") sortDir: String,
+        @RequestParam(required = false) android: Boolean?
     ): Any {
+        val useIp = android == true
         return if (page != null && size != null) {
-            service.getTimePingsPaginated(status, fromDate, toDate, page, size, sortBy, sortDir)
+            service.getTimePingsPaginated(status, fromDate, toDate, page, size, sortBy, sortDir, useIp)
         } else {
-            service.getTimePings(status, fromDate, toDate)
+            service.getTimePings(status, fromDate, toDate, useIp)
         }
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить один запрос времени пинга по ID", description = "Возвращает детали конкретного запроса времени пинга")
     @SecurityRequirement(name = "bearerAuth")
-    fun getOne(@PathVariable id: Int): PingTimeDTO = service.getTimePing(id)
+    fun getOne(
+        @PathVariable id: Int,
+        @RequestParam(required = false) android: Boolean?
+    ): PingTimeDTO = service.getTimePing(id, android == true)
 
     @PutMapping("/{id}/form")
     @Operation(summary = "Сформировать запрос времени пинга из черновика", description = "Изменяет статус черновика на сформированный и устанавливает дату формирования")

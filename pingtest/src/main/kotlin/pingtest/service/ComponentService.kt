@@ -30,38 +30,38 @@ class ComponentService(
     @PersistenceContext
     private lateinit var entityManager: EntityManager
 
-    fun getComponentsAsDomain(filter: String?): List<ServerComponent> {
+    fun getComponentsAsDomain(filter: String?, useIp: Boolean = false): List<ServerComponent> {
         val components = if (filter.isNullOrBlank()) {
             componentRepository.findAll().filter { it.status == ServerComponentStatus.ACTIVE }
         } else {
             componentRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(filter, filter)
                 .filter { it.status == ServerComponentStatus.ACTIVE }
         }
-        components.forEach { component -> component.imageUrl = generatePresignedUrl(component.image) }
+        components.forEach { component -> component.imageUrl = generatePresignedUrl(component.image, useIp) }
         return components
     }
 
-    fun getComponentAsDomain(id: Int): ServerComponent? {
+    fun getComponentAsDomain(id: Int, useIp: Boolean = false): ServerComponent? {
         val component = componentRepository.findById(id).orElse(null) ?: return null
         if (component.status != ServerComponentStatus.ACTIVE) return null
-        component.imageUrl = generatePresignedUrl(component.image)
+        component.imageUrl = generatePresignedUrl(component.image, useIp)
         return component
     }
 
-    fun getComponents(filter: String?): List<ComponentDTO> {
+    fun getComponents(filter: String?, useIp: Boolean = false): List<ComponentDTO> {
         val components = if (filter.isNullOrBlank()) {
             componentRepository.findAll().filter { it.status == ServerComponentStatus.ACTIVE }
         } else {
             componentRepository.findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(filter, filter)
                 .filter { it.status == ServerComponentStatus.ACTIVE }
         }
-        return components.map { toDTO(it) }
+        return components.map { toDTO(it, useIp) }
     }
 
-    fun getComponent(id: Int): ComponentDTO {
+    fun getComponent(id: Int, useIp: Boolean = false): ComponentDTO {
         val component = componentRepository.findById(id).orElseThrow { NoSuchElementException("Component not found") }
         if (component.status != ServerComponentStatus.ACTIVE) throw RuntimeException("Серверный компонент удален")
-        return toDTO(component)
+        return toDTO(component, useIp)
     }
 
     @Transactional
@@ -124,7 +124,7 @@ class ComponentService(
         )
         component.image = objectName
         componentRepository.save(component)
-        return generatePresignedUrl(objectName) ?: throw RuntimeException("Failed to generate URL")
+        return generatePresignedUrl(objectName, false) ?: throw RuntimeException("Failed to generate URL")
     }
 
     fun generatePresignedUrl(imageName: String?, useIp: Boolean = false): String? {
@@ -155,9 +155,9 @@ class ComponentService(
         )
     }
 
-    private fun toDTO(component: ServerComponent): ComponentDTO = ComponentDTO(
+    private fun toDTO(component: ServerComponent, useIp: Boolean = false): ComponentDTO = ComponentDTO(
         component.id, component.title, component.description, component.longDescription,
-        component.time, generatePresignedUrl(component.image)
+        component.time, generatePresignedUrl(component.image, useIp)
     )
 
     fun getPreference(userId: Int, componentId: Int): String? {
