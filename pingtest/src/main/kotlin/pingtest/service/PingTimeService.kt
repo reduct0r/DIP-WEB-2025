@@ -255,7 +255,116 @@ class PingTimeService(
         val queryTime = System.currentTimeMillis() - startTime
         
         // Выводим время запроса в консоль
-        println("getPingTimesQuery: ${queryTime} мс")
+        println("getPingTimesQuery: ${queryTime} ms")
+        
+        // Выводим план запроса (EXPLAIN ANALYZE) для демонстрации использования индекса
+        try {
+            val explainQuery = when {
+                // Если фильтруется по конкретному статусу - используем составной индекс
+                statusFilter != null && from != null && to != null -> {
+                    """
+                    EXPLAIN ANALYZE
+                    SELECT * FROM ping_times 
+                    WHERE status = :status
+                    AND status NOT IN ('DELETED', 'DRAFT')
+                    AND formation_date BETWEEN :from AND :to
+                    ORDER BY formation_date DESC
+                    LIMIT :size OFFSET :offset
+                    """
+                }
+                statusFilter != null && from != null -> {
+                    """
+                    EXPLAIN ANALYZE
+                    SELECT * FROM ping_times 
+                    WHERE status = :status
+                    AND status NOT IN ('DELETED', 'DRAFT')
+                    AND formation_date >= :from
+                    ORDER BY formation_date DESC
+                    LIMIT :size OFFSET :offset
+                    """
+                }
+                statusFilter != null && to != null -> {
+                    """
+                    EXPLAIN ANALYZE
+                    SELECT * FROM ping_times 
+                    WHERE status = :status
+                    AND status NOT IN ('DELETED', 'DRAFT')
+                    AND formation_date <= :to
+                    ORDER BY formation_date DESC
+                    LIMIT :size OFFSET :offset
+                    """
+                }
+                statusFilter != null -> {
+                    """
+                    EXPLAIN ANALYZE
+                    SELECT * FROM ping_times 
+                    WHERE status = :status
+                    AND status NOT IN ('DELETED', 'DRAFT')
+                    ORDER BY formation_date DESC
+                    LIMIT :size OFFSET :offset
+                    """
+                }
+                from != null && to != null -> {
+                    """
+                    EXPLAIN ANALYZE
+                    SELECT * FROM ping_times 
+                    WHERE status NOT IN ('DELETED', 'DRAFT')
+                    AND formation_date BETWEEN :from AND :to
+                    ORDER BY formation_date DESC
+                    LIMIT :size OFFSET :offset
+                    """
+                }
+                from != null -> {
+                    """
+                    EXPLAIN ANALYZE
+                    SELECT * FROM ping_times 
+                    WHERE status NOT IN ('DELETED', 'DRAFT')
+                    AND formation_date >= :from
+                    ORDER BY formation_date DESC
+                    LIMIT :size OFFSET :offset
+                    """
+                }
+                to != null -> {
+                    """
+                    EXPLAIN ANALYZE
+                    SELECT * FROM ping_times 
+                    WHERE status NOT IN ('DELETED', 'DRAFT')
+                    AND formation_date <= :to
+                    ORDER BY formation_date DESC
+                    LIMIT :size OFFSET :offset
+                    """
+                }
+                else -> {
+                    """
+                    EXPLAIN ANALYZE
+                    SELECT * FROM ping_times 
+                    WHERE status NOT IN ('DELETED', 'DRAFT')
+                    ORDER BY formation_date DESC
+                    LIMIT :size OFFSET :offset
+                    """
+                }
+            }
+            
+            val explainResult = entityManager.createNativeQuery(explainQuery).apply {
+                if (statusFilter != null) setParameter("status", statusFilter.name)
+                if (from != null) setParameter("from", from)
+                if (to != null) setParameter("to", to)
+                setParameter("size", size)
+                setParameter("offset", page * size)
+            }.resultList
+            
+            println("=== (EXPLAIN ANALYZE) ===")
+            println("Index ${if (indexConfig.enabled) "ON" else "OFF"}")
+            if (statusFilter != null) {
+                println("Status filter: ${statusFilter.name}")
+            }
+            explainResult.forEach { row ->
+                println(row)
+            }
+            println("=====================================")
+        } catch (e: Exception) {
+            println("ERROR: ${e.message}")
+        }
 
         return PaginatedResponseDTO(
             content = pingTimesPage.content.map { toDTO(it) },
